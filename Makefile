@@ -14,9 +14,13 @@ FIXRPATH := touch
 LIBEXT := so
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
+# name of the environment variable
+LD_ENV := LD_LIBRARY_PATH="$(LD_LIBRARY_PATH):$(DEST)/lib"
 
 ifeq "$(OS)" "Darwin"
+	LD_ENV = DYLD_LIBRARY_PATH="$(DYLD_LIBRARY_PATH):$(DEST)/lib"
 	LIBEXT = dylib
+# this is done to fix the path that the macOS looks for libraries
 	FIXRPATH = @install_name_tool \
 		-add_rpath @executable_path/lib \
 		-add_rpath @executable_path/deps/lib \
@@ -29,32 +33,6 @@ ifeq "$(OS)" "Darwin"
 		-change libkeystone.dylib @rpath/libkeystone.dylib \
 		-change libkeystone.0.dylib @rpath/libkeystone.0.dylib \
 		-change libkeystone.1.dylib @rpath/libkeystone.1.dylib
-endif
-
-# figure out if we can download Go
-GOVERSION=1.10.1
-ifeq "$(ARCH)" "x86_64"
-	ifeq "$(OS)" "Darwin"
-		GOURL = "https://storage.googleapis.com/golang/go$(GOVERSION).darwin-amd64.tar.gz"
-	else ifeq "$(OS)" "Linux"
-		GOURL = "https://storage.googleapis.com/golang/go$(GOVERSION).linux-amd64.tar.gz"
-	endif
-endif
-ifeq "$(ARCH)" "i686"
-	ifeq "$(OS)" "Linux"
-		GOURL = "https://storage.googleapis.com/golang/go$(GOVERSION).linux-386.tar.gz"
-	endif
-endif
-ifneq (,$(filter $(ARCH),armv6l armv7l armv8l))
-	ifeq "$(OS)" "Linux"
-		GOURL = "https://storage.googleapis.com/golang/go$(GOVERSION).linux-armv6l.tar.gz"
-	endif
-endif
-
-ifeq ($(GOURL),)
-	GOMSG = "Go 1.6 or later is required. Visit https://golang.org/dl/ to download."
-else
-	GODIR = go-$(ARCH)-$(OS)
 endif
 
 deps/$(GODIR):
@@ -88,45 +66,28 @@ deps/lib/libkeystone.0.$(LIBEXT):
 
 deps: deps/lib/libunicorn.1.$(LIBEXT) deps/lib/libcapstone.3.$(LIBEXT) deps/lib/libkeystone.0.$(LIBEXT) deps/$(GODIR)
 
-# Go executable targets
-.gopath:
-	mkdir -p .gopath/src/github.com/lunixbochs
-	ln -s ../../../.. .gopath/src/github.com/lunixbochs/usercorn
-
 export CGO_CFLAGS = -I$(DEST)/include
 export CGO_LDFLAGS = -L$(DEST)/lib
 
-GOBUILD := go build
-PATH := '$(DEST)/$(GODIR)/bin:$(PATH)'
-SHELL := env LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(DEST)/lib DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH):$(DEST)/lib PATH=$(PATH) /bin/bash
-
-ifneq ($(wildcard $(DEST)/$(GODIR)/.),)
-	export GOROOT := $(DEST)/$(GODIR)
-endif
-ifneq ($(GOPATH),)
-	export GOPATH := $(GOPATH):$(shell pwd)/.gopath
-else
-	export GOPATH := $(DEST)/gopath:$(shell pwd)/.gopath
-endif
-DEPS=$(shell go list -f '{{join .Deps "\n"}}' ./go/... | grep -v usercorn | grep '\.' | sort -u)
-PKGS=$(shell go list ./go/... | sort -u | rev | sed -e 's,og/.*$$,,' | rev | sed -e 's,^,github.com/lunixbochs/usercorn/go,')
+DEPS=$(shell go list -f '{{join .Deps "\n"}}' ./... | grep -v usercorn | grep '\.' | sort -u)
+PKGS=$(shell go list .//... | sort -u | rev | sed -e 's,og/.*$$,,' | rev | sed -e 's,^,github.com/lunixbochs/usercorn/go,')
 
 # TODO: more DRY?
-usercorn: .gopath
+usercorn:
 	rm -f usercorn
-	$(GOBUILD) -o usercorn ./go/cmd/main
+	$(LD_ENV) go build -o usercorn ./cmd/main
 	$(FIXRPATH) usercorn
 
-get: .gopath
+get:
 	go get -u ${DEPS}
 
-test: .gopath
-	go test -v ./go/...
+test:
+	go test -v ./...
 
-cov: .gopath
+cov:
 	go get -u github.com/haya14busa/goverage
 	goverage -v -coverprofile=coverage.out ${PKGS}
 	go tool cover -html=coverage.out
 
-bench: .gopath
-	go test -v -benchmem -bench=. ./go/...
+bench:
+	go test -v -benchmem -bench=. ./...
