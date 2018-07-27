@@ -3,6 +3,9 @@
 package vlinux
 
 import (
+	"fmt"
+	"log"
+	"net"
 	"os"
 
 	"github.com/felberj/ramfs"
@@ -21,6 +24,18 @@ type VirtualLinuxKernel struct {
 	Fs     *ramfs.Filesystem
 	Fds    map[co.Fd]File // Open file descriptors
 	nextfd co.Fd
+}
+
+type netFile struct {
+	net.Conn
+}
+
+func (f *netFile) Stat() (os.FileInfo, error) {
+	return nil, fmt.Errorf("stat on netfile not implemented")
+}
+
+func (f *netFile) Truncate(int64) error {
+	return fmt.Errorf("truncate on netfile not implemented")
 }
 
 // NewVirtualKernel creates a Linux Kernel that is isolated from the operating system.
@@ -42,4 +57,24 @@ func (k *VirtualLinuxKernel) initFs() {
 	k.Fds[0] = os.Stdin
 	k.Fds[1] = os.Stdout
 	k.nextfd = 3
+}
+
+// StdinOutPort redirects stdin and stout to the connection that connects
+// to the specified port.
+func (k *VirtualLinuxKernel) StdinOutPort(port int) error {
+	addr := fmt.Sprintf("localhost:%d", port)
+	log.Printf("Listen on %q for incoming connection", addr)
+	l, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	defer l.Close()
+	c, err := l.Accept()
+	if err != nil {
+		return err
+	}
+	nf := &netFile{c}
+	k.Fds[0] = nf
+	k.Fds[1] = nf
+	return nil
 }

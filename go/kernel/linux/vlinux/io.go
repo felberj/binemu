@@ -97,7 +97,9 @@ func (k *VirtualLinuxKernel) Writev(fd co.Fd, iov co.Buf, count uint64) uint64 {
 		data, _ := k.U.MemRead(vec.Base, vec.Len)
 		n, err := syscall.Write(int(fd), data)
 		if err != nil {
-			return posix.Errno(err)
+			// return posix.Errno(err)
+			// TODO
+			return MinusOne
 		}
 		written += uint64(n)
 	}
@@ -130,7 +132,9 @@ func (k *VirtualLinuxKernel) Read(fd co.Fd, buf co.Obuf, size co.Len) uint64 {
 		}
 		count, err := file.Read(tmp)
 		if err != nil {
-			return posix.Errno(err)
+			// return posix.Errno(err)
+			// TODO
+			return MinusOne
 		}
 		if err := buf.Pack(tmp[:count]); err != nil {
 			return MinusOne
