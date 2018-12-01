@@ -1,4 +1,5 @@
 deps/
+vendor/
 
 /cfg
 /cgc

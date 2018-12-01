@@ -35,15 +35,6 @@ ifeq "$(OS)" "Darwin"
 		-change libkeystone.1.dylib @rpath/libkeystone.1.dylib
 endif
 
-deps/$(GODIR):
-	echo $(GOMSG)
-	[ -n $(GOURL) ] && \
-	mkdir -p deps/build deps/gopath && \
-	cd deps/build && \
-	curl -o go-dist.tar.gz "$(GOURL)" && \
-	cd .. && tar -xf build/go-dist.tar.gz && \
-	mv go $(GODIR)
-
 deps/lib/libunicorn.1.$(LIBEXT):
 	cd deps/build && \
 	git clone https://github.com/unicorn-engine/unicorn.git && git --git-dir unicorn fetch; \
@@ -64,30 +55,28 @@ deps/lib/libkeystone.0.$(LIBEXT):
 	cmake -DCMAKE_INSTALL_PREFIX=$(DEST) -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DLLVM_TARGETS_TO_BUILD="all" -G "Unix Makefiles" .. && \
 	make -j2 install
 
-deps: deps/lib/libunicorn.1.$(LIBEXT) deps/lib/libcapstone.3.$(LIBEXT) deps/lib/libkeystone.0.$(LIBEXT) deps/$(GODIR)
+deps: deps/lib/libunicorn.1.$(LIBEXT) deps/lib/libcapstone.3.$(LIBEXT) deps/lib/libkeystone.0.$(LIBEXT)
 
 export CGO_CFLAGS = -I$(DEST)/include
 export CGO_LDFLAGS = -L$(DEST)/lib
 
-DEPS=$(shell go list -f '{{join .Deps "\n"}}' ./... | grep -v usercorn | grep '\.' | sort -u)
 PKGS=$(shell go list .//... | sort -u | rev | sed -e 's,og/.*$$,,' | rev | sed -e 's,^,github.com/lunixbochs/usercorn/go,')
 
-# TODO: more DRY?
-usercorn:
-	rm -f usercorn
+vendor: Gopkg.toml
+	dep ensure
+	touch vendor
+
+usercorn: vendor
 	$(LD_ENV) go build -o usercorn ./cmd/main
 	$(FIXRPATH) usercorn
 
-get:
-	go get -u ${DEPS}
-
-test:
+test: vendor
 	go test -v ./...
 
-cov:
+cov: vendor
 	go get -u github.com/haya14busa/goverage
 	goverage -v -coverprofile=coverage.out ${PKGS}
 	go tool cover -html=coverage.out
 
-bench:
+bench: vendor
 	go test -v -benchmem -bench=. ./...
