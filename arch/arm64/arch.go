@@ -1,9 +1,8 @@
 package arm64
 
 import (
-	ks "github.com/keystone-engine/keystone/bindings/go/keystone"
-	cs "github.com/lunixbochs/capstr"
 	uc "github.com/felberj/binemu/unicorn"
+	cs "github.com/lunixbochs/capstr"
 
 	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
@@ -17,7 +16,6 @@ var Arch = &models.Arch{
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_ARM64, Mode: uc.MODE_ARM},
 	Dis: &cpu.Capstr{Arch: cs.ARCH_ARM64, Mode: cs.MODE_ARM},
-	Asm: &cpu.Keystone{Arch: ks.ARCH_ARM64, Mode: ks.MODE_LITTLE_ENDIAN},
 
 	PC: uc.ARM64_REG_PC,
 	SP: uc.ARM64_REG_SP,

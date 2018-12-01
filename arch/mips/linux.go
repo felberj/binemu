@@ -2,8 +2,9 @@ package mips
 
 import (
 	"fmt"
-	sysnum "github.com/lunixbochs/ghostrace/ghost/sys/num"
+
 	uc "github.com/felberj/binemu/unicorn"
+	sysnum "github.com/lunixbochs/ghostrace/ghost/sys/num"
 
 	"github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
@@ -17,8 +18,7 @@ type MipsLinuxKernel struct {
 }
 
 func (k *MipsLinuxKernel) SetThreadArea(addr uint64) error {
-	// TODO: Unicorn needs CP0 register support
-	return k.U.RunAsm(0, "mtc0 $t0, $29", map[int]uint64{uc.MIPS_REG_T0: addr}, nil)
+	panic("not implemented")
 }
 
 func LinuxKernels(u models.Usercorn) []interface{} {

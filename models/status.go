@@ -3,25 +3,11 @@ package models
 import (
 	"fmt"
 	"strings"
-
-	"github.com/mgutz/ansi"
 )
 
 type StatusDiff struct {
 	U       Usercorn
 	oldRegs map[int]uint64
-}
-
-var chSame = ansi.ColorCode("default:default")
-var chNew = ansi.ColorCode("default+bu:default")
-
-func colorPad(s, color string, pad int) string {
-	length := len(s)
-	s = color + s + ansi.Reset
-	if length < pad {
-		s = strings.Repeat(" ", pad-length) + s
-	}
-	return s
 }
 
 type ChangeMask struct {
@@ -76,24 +62,12 @@ func (c *Change) Mask(bsz int) []ChangeMask {
 	return masks
 }
 
-func (c *Change) String(bsz int, color bool) string {
+func (c *Change) String(bsz int) string {
 	var out []string
 	hexFmt := fmt.Sprintf("%%0%dx", bsz)
 	lineStart := fmt.Sprintf(" %4s 0x", c.Name)
 	if c.Changed() {
-		if color {
-			out = append(out, fmt.Sprintf(" %s 0x", colorPad(c.Name, chNew, 4)))
-			for _, mask := range c.Mask(bsz) {
-				col := chSame
-				if mask.Changed {
-					col = chNew
-				}
-				out = append(out, col+mask.New)
-			}
-			out = append(out, ansi.Reset)
-		} else {
-			out = append(out, fmt.Sprintf("+ "+lineStart+hexFmt, c.New))
-		}
+		out = append(out, fmt.Sprintf("+ "+lineStart+hexFmt, c.New))
 	} else {
 		out = append(out, fmt.Sprintf(lineStart+hexFmt, c.New))
 	}
@@ -105,7 +79,7 @@ type Changes struct {
 	Changes []*Change
 }
 
-func (cs *Changes) String(color bool) string {
+func (cs *Changes) String() string {
 	var out []string
 	var printRow = func(changes []*Change, cols int) {
 		if len(changes) < cols && len(changes) > 0 {
@@ -114,7 +88,7 @@ func (cs *Changes) String(color bool) string {
 			out = append(out, pad)
 		}
 		for _, c := range changes {
-			out = append(out, c.String(cs.Bsz, color))
+			out = append(out, c.String(cs.Bsz))
 			out = append(out, " ")
 		}
 		if len(changes) > 0 {

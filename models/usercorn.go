@@ -46,7 +46,6 @@ type Usercorn interface {
 
 	RunShellcodeMapped(addr uint64, code []byte, setRegs map[int]uint64, regsClobbered []int) error
 	RunShellcode(addr uint64, code []byte, setRegs map[int]uint64, regsClobbered []int) error
-	RunAsm(addr uint64, asm string, setRegs map[int]uint64, regsClobbered []int) error
 
 	BreakAdd(desc string, future bool, cb func(u Usercorn, addr uint64)) (*Breakpoint, error)
 	BreakDel(b *Breakpoint) error

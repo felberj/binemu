@@ -2,14 +2,13 @@ package trace
 
 import (
 	"encoding/binary"
-	"github.com/golang/snappy"
-	"github.com/lunixbochs/struc"
-	"github.com/pkg/errors"
 	"io"
 	"strings"
 
 	"github.com/felberj/binemu/arch"
 	"github.com/felberj/binemu/models"
+	"github.com/lunixbochs/struc"
+	"github.com/pkg/errors"
 )
 
 var TRACE_MAGIC = "UCIR"
@@ -36,7 +35,7 @@ type TraceHeader struct {
 }
 
 type TraceWriter struct {
-	w, zw io.WriteCloser
+	w io.WriteCloser
 }
 
 func NewWriter(w io.WriteCloser, u models.Usercorn) (*TraceWriter, error) {
@@ -66,26 +65,23 @@ func NewWriter(w io.WriteCloser, u models.Usercorn) (*TraceWriter, error) {
 	if err := struc.Pack(w, header); err != nil {
 		return nil, errors.Wrap(err, "failed to pack header")
 	}
-	zw := snappy.NewBufferedWriter(w)
-	return &TraceWriter{w: w, zw: zw}, nil
+	return &TraceWriter{w: w}, nil
 }
 
 // write a frame at a time
 func (t *TraceWriter) Pack(frame models.Op) error {
 	tmp := make([]byte, frame.Sizeof())
 	frame.Pack(tmp)
-	_, err := t.zw.Write(tmp)
+	_, err := t.w.Write(tmp)
 	return err
 }
 
 func (t *TraceWriter) Close() {
-	t.zw.Close()
 	t.w.Close()
 }
 
 type TraceReader struct {
 	r      io.ReadCloser
-	zr     *snappy.Reader
 	Header TraceHeader
 
 	Arch *models.Arch
@@ -124,16 +120,14 @@ func NewReader(r io.ReadCloser) (*TraceReader, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get arch/OS")
 	}
-	t.zr = snappy.NewReader(r)
 	return t, nil
 }
 
 func (t *TraceReader) Next() (models.Op, error) {
-	op, _, err := Unpack(t.zr, false)
+	op, _, err := Unpack(t.r, false)
 	return op, err
 }
 
 func (t *TraceReader) Close() {
-	t.zr.Reset(nil)
 	t.r.Close()
 }

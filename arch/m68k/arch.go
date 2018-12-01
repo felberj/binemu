@@ -17,7 +17,6 @@ var Arch = &models.Arch{
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_M68K, Mode: uc.MODE_BIG_ENDIAN},
 	// no capstone support for m68k
-	Asm: nil,
 	Dis: nil,
 
 	PC: uc.M68K_REG_PC,

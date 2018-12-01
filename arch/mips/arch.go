@@ -1,9 +1,8 @@
 package mips
 
 import (
-	ks "github.com/keystone-engine/keystone/bindings/go/keystone"
-	cs "github.com/lunixbochs/capstr"
 	uc "github.com/felberj/binemu/unicorn"
+	cs "github.com/lunixbochs/capstr"
 
 	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
@@ -17,7 +16,6 @@ var Arch = &models.Arch{
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_MIPS, Mode: uc.MODE_MIPS32 + uc.MODE_LITTLE_ENDIAN},
 	Dis: &cpu.Capstr{Arch: cs.ARCH_MIPS, Mode: cs.MODE_MIPS32 + cs.MODE_LITTLE_ENDIAN},
-	Asm: &cpu.Keystone{Arch: ks.ARCH_MIPS, Mode: ks.MODE_MIPS32 + ks.MODE_LITTLE_ENDIAN},
 
 	PC: uc.MIPS_REG_PC,
 	SP: uc.MIPS_REG_SP,

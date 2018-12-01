@@ -1,9 +1,8 @@
 package arm
 
 import (
-	ks "github.com/keystone-engine/keystone/bindings/go/keystone"
-	cs "github.com/lunixbochs/capstr"
 	uc "github.com/felberj/binemu/unicorn"
+	cs "github.com/lunixbochs/capstr"
 
 	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
@@ -17,7 +16,6 @@ var Arch = &models.Arch{
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_ARM, Mode: uc.MODE_ARM},
 	Dis: &cpu.Capstr{Arch: cs.ARCH_ARM, Mode: cs.MODE_ARM},
-	Asm: &cpu.Keystone{Arch: ks.ARCH_ARM, Mode: ks.MODE_ARM},
 
 	PC: uc.ARM_REG_PC,
 	SP: uc.ARM_REG_SP,
@@ -46,31 +44,7 @@ var Arch = &models.Arch{
 }
 
 func EnterUsermode(u models.Usercorn) error {
-	// move CPU from System to User mode
-	modeSwitchAsm := `
-        mrs r0, cpsr
-        bic r0, r0, $0x1f
-        orr r0, r0, $0x10
-        msr cpsr_c, r0
-    `
-	modeSwitch, err := u.Asm(modeSwitchAsm, 0)
-	if err != nil {
-		return err
-	}
-	// this is manually mapped instead of using RunShellcode() so
-	// the link register will be set to exit the emulator correctly
-	size := uint64(len(modeSwitch))
-	addr, err := u.Malloc(size, "shellcode")
-	if err != nil {
-		return err
-	}
-	u.MemProt(addr, size, uc.PROT_ALL)
-	defer u.MemUnmap(addr, size)
-	end := addr + size
-	return u.RunShellcodeMapped(addr, modeSwitch,
-		map[int]uint64{uc.ARM_REG_LR: end},
-		[]int{uc.ARM_REG_R0, uc.ARM_REG_LR, uc.ARM_REG_SP},
-	)
+	panic("not implemented")
 }
 
 func EnableFPU(u models.Usercorn) error {

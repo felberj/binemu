@@ -1,9 +1,8 @@
 package x86_16
 
 import (
-	ks "github.com/keystone-engine/keystone/bindings/go/keystone"
-	cs "github.com/lunixbochs/capstr"
 	uc "github.com/felberj/binemu/unicorn"
+	cs "github.com/lunixbochs/capstr"
 
 	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
@@ -17,7 +16,6 @@ var Arch = &models.Arch{
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_X86, Mode: uc.MODE_16},
 	Dis: &cpu.Capstr{Arch: cs.ARCH_X86, Mode: cs.MODE_16},
-	Asm: &cpu.Keystone{Arch: ks.ARCH_X86, Mode: ks.MODE_16},
 
 	PC: uc.X86_REG_IP,
 	SP: uc.X86_REG_SP,

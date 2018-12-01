@@ -1,9 +1,8 @@
 package sparc
 
 import (
-	ks "github.com/keystone-engine/keystone/bindings/go/keystone"
-	cs "github.com/lunixbochs/capstr"
 	uc "github.com/felberj/binemu/unicorn"
+	cs "github.com/lunixbochs/capstr"
 
 	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
@@ -17,7 +16,6 @@ var Arch = &models.Arch{
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_SPARC, Mode: uc.MODE_SPARC32 | uc.MODE_BIG_ENDIAN},
 	Dis: &cpu.Capstr{Arch: cs.ARCH_SPARC, Mode: cs.MODE_BIG_ENDIAN},
-	Asm: &cpu.Keystone{Arch: ks.ARCH_SPARC, Mode: ks.MODE_SPARC32 | ks.MODE_BIG_ENDIAN},
 
 	PC: uc.SPARC_REG_PC,
 	SP: uc.SPARC_REG_SP,

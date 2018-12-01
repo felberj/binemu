@@ -2,8 +2,9 @@ package usercorn
 
 import (
 	"encoding/binary"
-	"github.com/pkg/errors"
 	"sort"
+
+	"github.com/pkg/errors"
 
 	"github.com/felberj/binemu/models"
 	"github.com/felberj/binemu/models/cpu"
@@ -46,10 +47,6 @@ func (t *Task) Bits() uint {
 
 func (t *Task) ByteOrder() binary.ByteOrder {
 	return t.order
-}
-
-func (t *Task) Asm(asm string, addr uint64) ([]byte, error) {
-	return models.Assemble(asm, addr, t.arch)
 }
 
 func (t *Task) Dis(addr, size uint64, showBytes bool) (string, error) {

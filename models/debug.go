@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 var demangleRe = regexp.MustCompile(`^[^(]+`)
@@ -62,13 +63,6 @@ func Demangle(name string) string {
 	demangleCache[name] = result
 	demangleLock.Unlock()
 	return result
-}
-
-func Assemble(asm string, addr uint64, arch *Arch) ([]byte, error) {
-	if arch.Asm != nil {
-		return arch.Asm.Asm(asm, addr)
-	}
-	return nil, errors.Errorf("Arch<%s>.Asm not initialized", arch.Name)
 }
 
 func Disas(mem []byte, addr uint64, arch *Arch, showBytes bool, pad ...int) (string, error) {

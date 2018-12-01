@@ -1,9 +1,8 @@
 package x86
 
 import (
-	ks "github.com/keystone-engine/keystone/bindings/go/keystone"
-	cs "github.com/lunixbochs/capstr"
 	uc "github.com/felberj/binemu/unicorn"
+	cs "github.com/lunixbochs/capstr"
 
 	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
@@ -17,7 +16,6 @@ var Arch = &models.Arch{
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_X86, Mode: uc.MODE_32},
 	Dis: &cpu.Capstr{Arch: cs.ARCH_X86, Mode: cs.MODE_32},
-	Asm: &cpu.Keystone{Arch: ks.ARCH_X86, Mode: ks.MODE_32},
 
 	PC: uc.X86_REG_EIP,
 	SP: uc.X86_REG_ESP,
@@ -59,25 +57,9 @@ var Arch = &models.Arch{
 }
 
 func Wrmsr(u models.Usercorn, msr, value uint64) {
-	u.RunAsm(
-		0, "wrmsr",
-		map[int]uint64{
-			uc.X86_REG_RAX: value & 0xFFFFFFFF,
-			uc.X86_REG_RDX: value >> 32 & 0xFFFFFFFF,
-			uc.X86_REG_RCX: msr & 0xFFFFFFFF,
-		}, nil,
-	)
+	panic("not unplemented")
 }
 
 func Rdmsr(u models.Usercorn, msr uint64) uint64 {
-	rcx, _ := u.RegRead(uc.X86_REG_RCX)
-	rdx, _ := u.RegRead(uc.X86_REG_RDX)
-
-	u.RunAsm(0, "rdmsr", map[int]uint64{uc.X86_REG_RAX: msr}, nil)
-	ecx, _ := u.RegRead(uc.X86_REG_ECX)
-	edx, _ := u.RegRead(uc.X86_REG_EDX)
-
-	u.RegWrite(uc.X86_REG_RCX, rcx)
-	u.RegWrite(uc.X86_REG_RDX, rdx)
-	return (edx << 32) | (ecx & 0xFFFFFFFF)
+	panic("not unplemented")
 }

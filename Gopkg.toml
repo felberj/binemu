@@ -30,14 +30,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/golang/snappy"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/keystone-engine/keystone"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/lunixbochs/argjoy"
 
 [[constraint]]
@@ -46,19 +38,11 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/lunixbochs/fvbommel-util"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/lunixbochs/ghostrace"
 
 [[constraint]]
   branch = "master"
   name = "github.com/lunixbochs/struc"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/mgutz/ansi"
 
 [[constraint]]
   name = "github.com/pkg/errors"
