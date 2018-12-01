@@ -2,17 +2,6 @@
 
 
 [[projects]]
-  digest = "1:2e466b6d6192ca7ad7c917e64e4a5d3796b516430b4a1134d7d4a8bc309c7d3c"
-  name = "github.com/chzyer/readline"
-  packages = [
-    ".",
-    "runes",
-  ]
-  pruneopts = "UT"
-  revision = "62c6fe6193755f722b8b8788aa7357be55a50ff1"
-  version = "v1.4"
-
-[[projects]]
   branch = "master"
   digest = "1:527cb1706f5e6c23dcf5218a76ef5a2865fe8da56cbd77d52f4805b54ffe1a46"
   name = "github.com/felberj/ramfs"
@@ -27,14 +16,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
-
-[[projects]]
-  branch = "master"
-  digest = "1:114ecad51af93a73ae6781fd0d0bc28e52b433c852b84ab4b4c109c15e6c6b6d"
-  name = "github.com/jroimartin/gocui"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "c055c87ae801372cd74a0839b972db4f7697ae5f"
 
 [[projects]]
   branch = "master"
@@ -81,35 +62,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e72bf31bf4f5c8cab9838ac66471d41cf914d01b7cbb21403bb8de85b7f20a73"
-  name = "github.com/lunixbochs/luaish"
-  packages = [
-    ".",
-    "ast",
-    "parse",
-    "pm",
-  ]
-  pruneopts = "UT"
-  revision = "20a5de713b1b8d18fa2c814d3323c50fd1dad506"
-
-[[projects]]
-  branch = "master"
-  digest = "1:01151de30a177ecad79052364c47bf7ef8a1656c95e0dc3f132fea0d759777a5"
-  name = "github.com/lunixbochs/luaish-luar"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "1d35ea91f7d210677e466cf1c1c63588195c6799"
-
-[[projects]]
-  digest = "1:310e6d9957d0bfde5c9423b0c9ae5ddf218564004157a567e9a3b43284970070"
-  name = "github.com/lunixbochs/readline"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "09b448ca0ba1566ed99bf53ab0f0547ee748cdc9"
-  version = "v1.1"
-
-[[projects]]
-  branch = "master"
   digest = "1:40bf4b24f9127737b22d3b86ff0bef3c3e9d87604d6260d9f9b9125e7995ff49"
   name = "github.com/lunixbochs/struc"
   packages = ["."]
@@ -133,28 +85,12 @@
   version = "v0.0.4"
 
 [[projects]]
-  digest = "1:cdb899c199f907ac9fb50495ec71212c95cb5b0e0a8ee0800da0238036091033"
-  name = "github.com/mattn/go-runewidth"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb"
-  version = "v0.0.3"
-
-[[projects]]
   branch = "master"
   digest = "1:2b32af4d2a529083275afc192d1067d8126b578c7a9613b26600e4df9c735155"
   name = "github.com/mgutz/ansi"
   packages = ["."]
   pruneopts = "UT"
   revision = "9520e82c474b0a04dd04f8a40959027271bab992"
-
-[[projects]]
-  branch = "master"
-  digest = "1:01d9e47830ef6077fb6f91033b0e83f324ad5966d11ed3daa4a5822ace876dab"
-  name = "github.com/nsf/termbox-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "60ab7e3d12ed91bc1b2486559c4b3a6b62297577"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -166,36 +102,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8209ed8bf2336848aa760c11e809f93ba96fffa64d3c2948e970a362a46e534b"
-  name = "github.com/shibukawa/configdir"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "e180dbdc8da04c4fa04272e875ce64949f38bd3e"
-
-[[projects]]
-  branch = "master"
-  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
-  name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  pruneopts = "UT"
-  revision = "eb0de9b17e854e9b1ccd9963efafc79862359959"
-
-[[projects]]
-  branch = "master"
-  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
-  name = "golang.org/x/net"
-  packages = ["context"]
-  pruneopts = "UT"
-  revision = "351d144fa1fc0bd934e2408202be0c29f25e35a0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:0c7cb58af944f9690af91474a75371eecfe54c1ce3771a8dc08924430ee785d3"
+  digest = "1:8775d8a768d9e65e8b659172804aac5db1fc8d563ba766470a6c2698c57c61a7"
   name = "golang.org/x/sys"
-  packages = [
-    "unix",
-    "windows",
-  ]
+  packages = ["unix"]
   pruneopts = "UT"
   revision = "4ed8d59d0b35e1e29334a206d1b3f38b1e5dfb31"
 
@@ -203,24 +112,17 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/chzyer/readline",
     "github.com/felberj/ramfs",
     "github.com/golang/snappy",
-    "github.com/jroimartin/gocui",
     "github.com/keystone-engine/keystone/bindings/go/keystone",
     "github.com/lunixbochs/argjoy",
     "github.com/lunixbochs/capstr",
     "github.com/lunixbochs/fvbommel-util/sortorder",
     "github.com/lunixbochs/ghostrace/ghost/memio",
     "github.com/lunixbochs/ghostrace/ghost/sys/num",
-    "github.com/lunixbochs/luaish",
-    "github.com/lunixbochs/luaish-luar",
-    "github.com/lunixbochs/luaish/parse",
-    "github.com/lunixbochs/readline",
     "github.com/lunixbochs/struc",
     "github.com/mgutz/ansi",
     "github.com/pkg/errors",
-    "github.com/shibukawa/configdir",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

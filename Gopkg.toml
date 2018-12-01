@@ -23,9 +23,6 @@
 #   non-go = false
 #   go-tests = true
 #   unused-packages = true
-[[constraint]]
-  name = "github.com/chzyer/readline"
-  version = "1.4.0"
 
 [[constraint]]
   branch = "master"
@@ -34,10 +31,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/golang/snappy"
-
-[[constraint]]
-  name = "github.com/jroimartin/gocui"
-  branch = "master"
 
 [[constraint]]
   branch = "master"
@@ -61,18 +54,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/lunixbochs/luaish"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/lunixbochs/luaish-luar"
-
-[[constraint]]
-  name = "github.com/lunixbochs/readline"
-  version = "1.1.0"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/lunixbochs/struc"
 
 [[constraint]]
@@ -82,10 +63,6 @@
 [[constraint]]
   name = "github.com/pkg/errors"
   version = "0.8.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/shibukawa/configdir"
 
 [prune]
   go-tests = true

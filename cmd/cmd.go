@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -16,7 +15,6 @@ import (
 	"github.com/felberj/binemu/debug"
 	"github.com/felberj/binemu/loader"
 	"github.com/felberj/binemu/models"
-	"github.com/felberj/binemu/ui"
 	"github.com/pkg/errors"
 )
 
@@ -169,7 +167,6 @@ func (c *UsercornCmd) Run(argv, env []string) int {
 	gdb := fs.Int("gdb", -1, "listen for gdb connection on localhost:<port>")
 
 	streamui := fs.Bool("ui", false, "streaming text ui")
-	tui := fs.Bool("tui", false, "experimental interactive text UI")
 	startrepl := fs.Bool("repl", false, "experimental luaish repl")
 	var exec strslice
 	fs.Var(&exec, "ex", "execute luaish script(s) before starting")
@@ -247,17 +244,17 @@ func (c *UsercornCmd) Run(argv, env []string) int {
 		*looproll = 8
 	}
 	anytrace := *trace || *strace || *mtrace || *mtrace2 || *btrace || *etrace || *rtrace || *ftrace
-	if *tracefile == "" && anytrace && !*tui && !*streamui {
+	if *tracefile == "" && anytrace && !*streamui {
 		*streamui = true
 	}
-	if *startrepl || *tui {
+	if *startrepl {
 		*trace = true
 		*rewind = true
 	}
 	if *rewind {
 		*trace = true
 	}
-	if *verbose && !*streamui && !*tui {
+	if *verbose && !*streamui {
 		*streamui = true
 	}
 	config := &models.Config{
@@ -291,9 +288,7 @@ func (c *UsercornCmd) Run(argv, env []string) int {
 			MemBatch:     *mtrace2 || *trace,
 		},
 		Rewind: *rewind,
-		UI:     *streamui,
 
-		// FIXME: these are UI tracing flags and now broken
 		Demangle:    *demangle,
 		DisBytes:    *disbytes,
 		InsCount:    *inscount,
@@ -391,40 +386,6 @@ func (c *UsercornCmd) Run(argv, env []string) int {
 		go debug.NewGdbstub(corn).Run(conn)
 	}
 
-	var repl *ui.Repl
-	if *tui {
-		tui, err := ui.NewTui(corn)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error starting tui: %v\n", err)
-			return 1
-		}
-		corn.Gate().Lock()
-		defer tui.Close()
-		tui.Run()
-	} else if *startrepl || len(exec) > 0 {
-		repl, err = ui.NewRepl(corn)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error starting repl: %v\n", err)
-			return 1
-		}
-		for _, script := range exec {
-			text, err := ioutil.ReadFile(script)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error reading script %s: %v\n", script, err)
-				return 1
-			}
-			lines := strings.Split(string(text), "\n")
-			if repl.Lua.Exec(lines) {
-				fmt.Fprintf(os.Stderr, "unexpected EOF in script %s\n", script)
-				return 1
-			}
-		}
-		if *startrepl {
-			corn.Gate().Lock()
-			defer repl.Close()
-			repl.Run()
-		}
-	}
 	defer config.Output.Close()
 	// start executable
 	if c.RunUsercorn != nil {
@@ -432,17 +393,16 @@ func (c *UsercornCmd) Run(argv, env []string) int {
 	} else {
 		err = corn.Run()
 	}
-	if *startrepl && !repl.Closed {
+	if *startrepl {
 		corn.Gate().Lock()
 		config.Output.Close()
 	}
 	if err != nil {
 		if e, ok := err.(models.ExitStatus); ok {
 			return int(e)
-		} else {
-			c.PrintError(err)
-			return 1
 		}
+		c.PrintError(err)
+		return 1
 	}
 	return 0
 }

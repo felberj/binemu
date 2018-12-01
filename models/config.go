@@ -71,7 +71,6 @@ type Config struct {
 
 	Trace  TraceConfig
 	Rewind bool
-	UI     bool
 
 	SymFile bool
 
@@ -81,7 +80,6 @@ type Config struct {
 
 	PrefixArgs []string
 
-	// TODO: UI sub config
 	Demangle bool
 	DisBytes bool
 

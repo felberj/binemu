@@ -11,9 +11,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lunixbochs/ghostrace/ghost/memio"
-	"github.com/lunixbochs/readline"
-	"github.com/lunixbochs/struc"
 	"github.com/felberj/binemu/arch"
 	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/loader"
@@ -21,7 +18,8 @@ import (
 	"github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/binemu/models/debug"
 	"github.com/felberj/binemu/models/trace"
-	"github.com/felberj/binemu/ui"
+	"github.com/lunixbochs/ghostrace/ghost/memio"
+	"github.com/lunixbochs/struc"
 	"github.com/pkg/errors"
 )
 
@@ -76,7 +74,6 @@ type Usercorn struct {
 	trace    *trace.Trace
 	replay   *trace.Replay
 	rewind   []models.Op
-	ui       *ui.StreamUI
 	inscount uint64
 }
 
@@ -99,13 +96,9 @@ func NewUsercornRaw(l models.Loader, config *models.Config) (*Usercorn, error) {
 		exit:   0xffffffffffffffff,
 		debug:  debug.NewDebug(l.Arch(), config),
 	}
-	if u.config.Rewind || u.config.UI {
+	if u.config.Rewind {
 		u.replay = trace.NewReplay(u.arch, u.os, l.ByteOrder(), u.debug)
 		config.Trace.OpCallback = append(config.Trace.OpCallback, u.replay.Feed)
-		if config.UI {
-			u.ui = ui.NewStreamUI(u.config, u.replay)
-			u.replay.Listen(u.ui.Feed)
-		}
 		if u.config.Rewind {
 			u.rewind = make([]models.Op, 0, 10000)
 			config.Trace.OpCallback = append(config.Trace.OpCallback,
@@ -117,9 +110,6 @@ func NewUsercornRaw(l models.Loader, config *models.Config) (*Usercorn, error) {
 	u.trace, err = trace.NewTrace(u, &config.Trace)
 	if err != nil {
 		return nil, errors.Wrap(err, "NewTrace() failed")
-	}
-	if config.Output == os.Stderr && readline.IsTerminal(int(os.Stderr.Fd())) {
-		config.Color = true
 	}
 	u.memio = memio.NewMemIO(
 		// ReadAt() callback
@@ -228,108 +218,7 @@ func (u *Usercorn) Callstack() []models.Stackframe {
 }
 
 func (u *Usercorn) Rewind(by, addr uint64) error {
-	if !u.config.Rewind {
-		return errors.New("rewind not enabled in config")
-	}
-	var target uint64
-	if by > 0 {
-		if u.replay.Inscount < by {
-			// TODO: just rewind to start when this happens?
-			return errors.New("rewinding too far")
-		}
-		target = u.replay.Inscount - by
-	}
-	replay := trace.NewReplay(u.arch, u.os, u.ByteOrder(), u.debug)
-	good := false
-	var pos int
-	var op models.Op
-	// TODO: attach a StreamUI to remainder, but reverse the lines?
-	// do this if you want to see the trace getting replayed (forwards)
-	/*
-		ui := ui.NewStreamUI(u.config, replay)
-		replay.Listen(ui.Feed)
-	*/
-outer:
-	for pos, op = range u.rewind {
-		if target > 0 && replay.Inscount == target {
-			good = true
-			break
-		} else if target == 0 && replay.PC == addr {
-			if good {
-				// we need to confirm the addr isn't just the implicit pc after a call
-				// by checking for an OpJmp after
-				switch v := op.(type) {
-				case *trace.OpStep:
-					break outer
-				case *trace.OpJmp:
-					if v.Addr == addr {
-						break outer
-					}
-				}
-			}
-			good = true
-		}
-		replay.Feed(op)
-	}
-	if !good {
-		return errors.Errorf("missed rewind target (%d), hit %d", target, replay.Inscount)
-	}
-	//* sync simulated cpu *//
-	// 1. copy reg state FIXME: USE RegReadFast
-	// we use u.replay.Regs for the enums, because replay.Regs might not have all regs set
-	for enum, oldval := range u.replay.Regs {
-		newval, _ := replay.Regs[enum]
-		if oldval != newval {
-			name := u.Arch().RegNames()[enum]
-			if u.config.UI {
-				u.Printf("  %s (%#x) -> (%#x)\n", name, oldval, newval)
-			}
-			u.RegWrite(enum, newval)
-		}
-	}
-	if u.config.UI {
-		u.Printf("  pc %#x -> %#x\n", u.replay.PC, replay.PC)
-	}
-	pc := replay.PC
-	u.RegWrite(u.arch.PC, pc)
-	// TODO: special regs (SpRegs)
-
-	// 2. map all target mappings
-	for _, mm := range replay.Mem.Maps() {
-		if err := u.MemMap(mm.Addr, mm.Size, mm.Prot); err != nil {
-			return err
-		}
-		// 3. copy target memory
-		if err := u.MemWrite(mm.Addr, mm.Data); err != nil {
-			return err
-		}
-	}
-	// 4. truncate our rewind state
-	// TODO: instead of truncating, undo tree to allow ff/diff?
-	u.rewind = u.rewind[:pos+1]
-
-	// 5. tell trace we rewound so it updates register diffs
-	u.trace.Rewound()
-
-	// 6. dis our new current pc
-	mem, _ := u.DirectRead(pc, 16)
-	dis, err := u.Arch().Dis.Dis(mem, pc)
-	if err == nil && len(dis) > 0 {
-		padto := len(fmt.Sprintf("%#x", dis[0].Addr())) + 1
-		pad := strings.Repeat("<", padto)
-		if u.config.UI {
-			u.Printf("%s %s %s\n", pad, dis[0].Mnemonic(), dis[0].OpStr())
-		}
-	}
-
-	// 7. gross: update old replay with new data (so we don't need to mess with callbacks/defer)
-	u.replay.Mem = replay.Mem
-	u.replay.Regs = replay.Regs
-	u.replay.SpRegs = replay.SpRegs
-	u.replay.PC = replay.PC
-	u.replay.SP = replay.SP
-	u.replay.Inscount = replay.Inscount
-	return nil
+	panic("not implemented")
 }
 
 // Intercept memory read/write into MemIO to make tracing always work.
@@ -407,15 +296,7 @@ func (u *Usercorn) Run() error {
 			u.HookDel(v)
 		}
 		if e := recover(); e != nil {
-			msg := fmt.Sprintf("\n+++ caught panic +++\n%s\n%s\n\n", e, rdebug.Stack())
-			if u.ui == nil {
-				// FIXME: replay and task should be api-compatible, so we can pass a cpu in here instead
-				if u.replay == nil {
-					u.replay = trace.NewReplay(u.arch, u.os, u.Loader().ByteOrder(), u.debug)
-				}
-				u.ui = ui.NewStreamUI(u.config, u.replay)
-			}
-			u.ui.OnExit(false, msg)
+			fmt.Printf("\n+++ caught panic +++\n%s\n%s\n\n", e, rdebug.Stack())
 			panic(e)
 		}
 	}()
@@ -443,9 +324,6 @@ func (u *Usercorn) Run() error {
 		u.HookAdd(cpu.HOOK_CODE, func(_ cpu.Cpu, addr uint64, size uint32) {
 			u.inscount++
 		}, 1, 0)
-	}
-	if u.ui != nil {
-		u.ui.OnStart(u.entry)
 	}
 	// in case this isn't the first run
 	u.exitStatus = nil
@@ -491,12 +369,8 @@ func (u *Usercorn) Run() error {
 		}
 	}
 	if _, ok := err.(models.ExitStatus); !ok && err != nil || u.config.Verbose {
-		if u.ui != nil {
-			if err != nil {
-				u.ui.OnExit(false, err.Error())
-			} else {
-				u.ui.OnExit(false, "")
-			}
+		if err != nil {
+			fmt.Printf("got error: %v", err)
 		}
 	}
 	if u.config.InsCount {
