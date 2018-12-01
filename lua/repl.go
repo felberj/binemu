@@ -9,7 +9,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type LuaRepl struct {

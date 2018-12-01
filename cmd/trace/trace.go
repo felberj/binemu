@@ -8,12 +8,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/lunixbochs/usercorn/arch"
-	"github.com/lunixbochs/usercorn/cmd"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/debug"
-	"github.com/lunixbochs/usercorn/models/trace"
-	"github.com/lunixbochs/usercorn/ui"
+	"github.com/felberj/binemu/arch"
+	"github.com/felberj/binemu/cmd"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/debug"
+	"github.com/felberj/binemu/models/trace"
+	"github.com/felberj/binemu/ui"
 )
 
 func PrintJson(tf *trace.TraceReader) error {

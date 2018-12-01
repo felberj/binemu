@@ -3,11 +3,11 @@ package mips
 import (
 	ks "github.com/keystone-engine/keystone/bindings/go/keystone"
 	cs "github.com/lunixbochs/capstr"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/cpu"
-	"github.com/lunixbochs/usercorn/cpu/unicorn"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/cpu"
+	"github.com/felberj/binemu/cpu/unicorn"
+	"github.com/felberj/binemu/models"
 )
 
 var Arch = &models.Arch{

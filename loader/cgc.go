@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 var cgcMagic = []byte{0x7f, 0x43, 0x47, 0x43}

@@ -1,8 +1,8 @@
 package darwin
 
 import (
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/native/enum"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/native/enum"
 )
 
 func (k *DarwinKernel) Pread(fd co.Fd, buf co.Obuf, size co.Len, offset int64) uint64 {

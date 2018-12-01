@@ -1,7 +1,7 @@
 package trace
 
 import (
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type keyframe struct {

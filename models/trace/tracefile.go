@@ -8,8 +8,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/lunixbochs/usercorn/arch"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/arch"
+	"github.com/felberj/binemu/models"
 )
 
 var TRACE_MAGIC = "UCIR"

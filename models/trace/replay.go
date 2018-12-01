@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"github.com/pkg/errors"
 
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
-	"github.com/lunixbochs/usercorn/models/debug"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
+	"github.com/felberj/binemu/models/debug"
 )
 
 type Replay struct {

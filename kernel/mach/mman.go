@@ -1,8 +1,8 @@
 package mach
 
 import (
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/posix"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/posix"
 )
 
 func (k *MachKernel) KernelrpcMachVmAllocateTrap(target int, addrOut co.Obuf, size co.Len, flags int) uint64 {

@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/lunixbochs/usercorn/cmd"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/cmd"
+	"github.com/felberj/binemu/models"
 
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 /*

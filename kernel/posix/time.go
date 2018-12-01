@@ -5,8 +5,8 @@ import (
 	"syscall"
 	"time"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/native"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/native"
 )
 
 func (k *PosixKernel) Time(out co.Obuf) uint64 {

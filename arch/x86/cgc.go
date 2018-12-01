@@ -3,13 +3,13 @@ package x86
 import (
 	"crypto/rand"
 	"github.com/pkg/errors"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
-	"github.com/lunixbochs/usercorn/native"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
+	"github.com/felberj/binemu/native"
 )
 
 var cgcSysNum = map[int]string{

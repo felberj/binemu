@@ -4,7 +4,7 @@ import (
 	cs "github.com/lunixbochs/capstr"
 	"github.com/pkg/errors"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type Capstr struct {

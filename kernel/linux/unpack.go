@@ -4,10 +4,10 @@ import (
 	"syscall"
 
 	"github.com/lunixbochs/argjoy"
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/linux/unpack"
-	"github.com/lunixbochs/usercorn/native"
-	"github.com/lunixbochs/usercorn/native/enum"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/linux/unpack"
+	"github.com/felberj/binemu/native"
+	"github.com/felberj/binemu/native/enum"
 )
 
 func Unpack(k co.Kernel, arg interface{}, vals []interface{}) error {

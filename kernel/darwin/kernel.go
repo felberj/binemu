@@ -4,10 +4,10 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/mach"
-	"github.com/lunixbochs/usercorn/kernel/posix"
-	"github.com/lunixbochs/usercorn/models"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/mach"
+	"github.com/felberj/binemu/kernel/posix"
+	"github.com/felberj/binemu/models"
 )
 
 const (

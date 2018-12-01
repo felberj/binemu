@@ -3,10 +3,10 @@ package vlinux
 import (
 	"log"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/linux/unpack"
-	"github.com/lunixbochs/usercorn/models/cpu"
-	"github.com/lunixbochs/usercorn/native/enum"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/linux/unpack"
+	"github.com/felberj/binemu/models/cpu"
+	"github.com/felberj/binemu/native/enum"
 )
 
 const (

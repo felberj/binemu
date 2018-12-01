@@ -3,8 +3,8 @@ package linux
 import (
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/native"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/native"
 )
 
 func fdcount(bufs ...co.Obuf) int {

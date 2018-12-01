@@ -7,7 +7,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type region struct {

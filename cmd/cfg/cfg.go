@@ -3,8 +3,8 @@ package cfg
 import (
 	"fmt"
 
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 type Block struct {

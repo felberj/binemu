@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 var order = binary.LittleEndian

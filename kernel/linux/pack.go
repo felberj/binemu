@@ -4,8 +4,8 @@ import (
 	"github.com/lunixbochs/argjoy"
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/native"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/native"
 )
 
 func Pack(buf co.Buf, i interface{}) error {

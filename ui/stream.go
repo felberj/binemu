@@ -7,8 +7,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/trace"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/trace"
 )
 
 func pad(s string, to int) string {

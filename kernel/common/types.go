@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"os"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type (

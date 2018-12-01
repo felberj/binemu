@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 type Trace struct {

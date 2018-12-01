@@ -1,8 +1,8 @@
 package unpack
 
 import (
-	"github.com/lunixbochs/usercorn/models/cpu"
-	"github.com/lunixbochs/usercorn/native/enum"
+	"github.com/felberj/binemu/models/cpu"
+	"github.com/felberj/binemu/native/enum"
 )
 
 var mmapProtMap = map[int]int{

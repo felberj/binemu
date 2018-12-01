@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 func StackArgs(u models.Usercorn) func(n int) ([]uint64, error) {

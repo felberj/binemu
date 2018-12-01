@@ -8,9 +8,9 @@ import (
 	"github.com/lunixbochs/argjoy"
 	"github.com/pkg/errors"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/models"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/models"
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 const (

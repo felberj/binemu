@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lunixbochs/usercorn"
-	"github.com/lunixbochs/usercorn/debug"
-	"github.com/lunixbochs/usercorn/loader"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/ui"
+	"github.com/felberj/binemu"
+	"github.com/felberj/binemu/debug"
+	"github.com/felberj/binemu/loader"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/ui"
 	"github.com/pkg/errors"
 )
 

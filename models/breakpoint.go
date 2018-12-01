@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 var breakRe = regexp.MustCompile(`^((?P<addr>\*?0x[0-9a-fA-F]+|\d+)|(?P<source>.+):(?P<line>\d+)|(?P<sym>.+?(?P<off>\+0x[0-9a-fA-F]+|\d+)?))(@(?P<file>.+))?$`)

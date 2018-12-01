@@ -7,10 +7,10 @@ import (
 	"os"
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/posix"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/native/enum"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/posix"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/native/enum"
 )
 
 type File interface {

@@ -3,7 +3,7 @@ package models
 import (
 	"github.com/lunixbochs/ghostrace/ghost/memio"
 
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 type SysGetArgs func(n int) ([]uint64, error)

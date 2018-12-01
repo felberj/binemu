@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:b7096d56f1c561afe780c0e7ce176d890340f6abbac3ff6758c1a84e9a86e6f3"
-  name = "github.com/bnagy/gapstone"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "c8ce2e4cbb4a79435fdfead04377f984d51beab9"
-  version = "3.0.3"
-
-[[projects]]
   digest = "1:2e466b6d6192ca7ad7c917e64e4a5d3796b516430b4a1134d7d4a8bc309c7d3c"
   name = "github.com/chzyer/readline"
   packages = [
@@ -37,12 +29,12 @@
   revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
 
 [[projects]]
-  digest = "1:8e791db9ac7ec7eddd1f643be51d2dd66bb7093a92e86e3cbd22ddbeaad4d95b"
+  branch = "master"
+  digest = "1:114ecad51af93a73ae6781fd0d0bc28e52b433c852b84ab4b4c109c15e6c6b6d"
   name = "github.com/jroimartin/gocui"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4e9ce9a8e26f2ef33dfe297dbdfca148733b6b9b"
-  version = "v0.3.0"
+  revision = "c055c87ae801372cd74a0839b972db4f7697ae5f"
 
 [[projects]]
   branch = "master"
@@ -50,7 +42,7 @@
   name = "github.com/keystone-engine/keystone"
   packages = ["bindings/go/keystone"]
   pruneopts = "UT"
-  revision = "3ea06c9ed3fc23f134350383ff107a033ca7a5dc"
+  revision = "2c1a40b495cdc7d6b48f50bfacc7b53a6f1d051e"
 
 [[projects]]
   branch = "master"
@@ -62,11 +54,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:164d394b5d29b8b8da5ade8489d52535540c1204a4b21a22c5fa23169e8214f9"
+  digest = "1:4f7d0ef64b4d020824d1812b06d635d0b6e0fa2f6dbbebeb2015c96867a83b1e"
   name = "github.com/lunixbochs/capstr"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fd1870c1ba0d14bba6d7d125ceb71574704e16c2"
+  revision = "1b6ae95b8ac8c4b5969e5becf590b8ec42dc4091"
 
 [[projects]]
   branch = "master"
@@ -133,20 +125,20 @@
   version = "v0.0.9"
 
 [[projects]]
-  digest = "1:d4d17353dbd05cb52a2a52b7fe1771883b682806f68db442b436294926bbfafb"
+  digest = "1:0981502f9816113c9c8c4ac301583841855c8cf4da8c72f696b3ebedf6d0e4e5"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
-  version = "v0.0.3"
+  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
+  version = "v0.0.4"
 
 [[projects]]
-  digest = "1:e2d1d410fb367567c2b53ed9e2d719d3c1f0891397bb2fa49afd747cfbf1e8e4"
+  digest = "1:cdb899c199f907ac9fb50495ec71212c95cb5b0e0a8ee0800da0238036091033"
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
-  version = "v0.0.2"
+  revision = "ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb"
+  version = "v0.0.3"
 
 [[projects]]
   branch = "master"
@@ -158,11 +150,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c9b6e36dbd23f8403a04493376916ca5dad8c01b2da5ae0a05e6a468eb0b6f24"
+  digest = "1:01d9e47830ef6077fb6f91033b0e83f324ad5966d11ed3daa4a5822ace876dab"
   name = "github.com/nsf/termbox-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5c94acc5e6eb520f1bcd183974e01171cc4c23b3"
+  revision = "60ab7e3d12ed91bc1b2486559c4b3a6b62297577"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -182,19 +174,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6766d5f6adcdc36f1d63f83c099495803ca785497235269206e7780212e398d7"
-  name = "github.com/unicorn-engine/unicorn"
-  packages = ["bindings/go/unicorn"]
-  pruneopts = "UT"
-  revision = "1cb45fab51aaddf480948bf28700c3ab129366b2"
-
-[[projects]]
-  branch = "master"
-  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
+  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+  revision = "eb0de9b17e854e9b1ccd9963efafc79862359959"
 
 [[projects]]
   branch = "master"
@@ -202,24 +186,23 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
+  revision = "351d144fa1fc0bd934e2408202be0c29f25e35a0"
 
 [[projects]]
   branch = "master"
-  digest = "1:8742e6e73627b2877c3f723bc1823d5667ec59011242480309dc90fa862512aa"
+  digest = "1:0c7cb58af944f9690af91474a75371eecfe54c1ce3771a8dc08924430ee785d3"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+  revision = "4ed8d59d0b35e1e29334a206d1b3f38b1e5dfb31"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/bnagy/gapstone",
     "github.com/chzyer/readline",
     "github.com/felberj/ramfs",
     "github.com/golang/snappy",
@@ -238,7 +221,6 @@
     "github.com/mgutz/ansi",
     "github.com/pkg/errors",
     "github.com/shibukawa/configdir",
-    "github.com/unicorn-engine/unicorn/bindings/go/unicorn",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

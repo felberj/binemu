@@ -1,8 +1,8 @@
 package linux
 
 import (
-	"github.com/lunixbochs/usercorn/kernel/posix"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/kernel/posix"
+	"github.com/felberj/binemu/models"
 )
 
 const (

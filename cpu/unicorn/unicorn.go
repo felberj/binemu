@@ -2,9 +2,9 @@ package unicorn
 
 import (
 	"github.com/pkg/errors"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 type Builder struct {

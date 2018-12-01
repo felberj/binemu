@@ -5,13 +5,13 @@ import (
 	"log"
 
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
-	"github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/linux"
-	"github.com/lunixbochs/usercorn/kernel/linux/vlinux"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/linux"
+	"github.com/felberj/binemu/kernel/linux/vlinux"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
 	"github.com/pkg/errors"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 // LinuxAMD64Kernel implements AMD64 specific syscalls (like stetting up GS and FS)
@@ -77,7 +77,7 @@ func (k *LinuxAMD64Kernel) ArchPrctl(code int, addr uint64) {
 	switch code {
 	case ARCH_SET_FS:
 		u := k.U.Backend().(uc.Unicorn)
-		u.X86MsrWrite(fsmsr, addr)
+		u.RegWriteX86Msr(fsmsr, addr)
 	// case ARCH_GET_FS:
 	// 	v, _ := u.X86MsrRead(fsmsr)
 	/*	case ARCH_SET_GS:

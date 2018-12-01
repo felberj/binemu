@@ -1,7 +1,7 @@
 package lua
 
 import (
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models/cpu"
 
 	"github.com/lunixbochs/luaish"
 )

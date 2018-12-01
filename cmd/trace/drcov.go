@@ -10,11 +10,11 @@ import (
 	"os"
 	"sort"
 
-	"github.com/lunixbochs/usercorn/arch"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
-	"github.com/lunixbochs/usercorn/models/debug"
-	"github.com/lunixbochs/usercorn/models/trace"
+	"github.com/felberj/binemu/arch"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
+	"github.com/felberj/binemu/models/debug"
+	"github.com/felberj/binemu/models/trace"
 )
 
 type drcovBB struct {

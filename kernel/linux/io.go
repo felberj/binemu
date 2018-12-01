@@ -8,8 +8,8 @@ import (
 	"path"
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/posix"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/posix"
 )
 
 const UINT64_MAX = 0xFFFFFFFFFFFFFFFF

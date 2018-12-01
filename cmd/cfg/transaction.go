@@ -1,10 +1,10 @@
 package cfg
 
 import (
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 type Transaction struct {

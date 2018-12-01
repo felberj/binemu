@@ -3,9 +3,9 @@ package cmd
 import (
 	"encoding/binary"
 
-	"github.com/lunixbochs/usercorn"
-	"github.com/lunixbochs/usercorn/loader"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu"
+	"github.com/felberj/binemu/loader"
+	"github.com/felberj/binemu/models"
 	"github.com/pkg/errors"
 )
 

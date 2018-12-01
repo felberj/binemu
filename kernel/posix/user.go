@@ -4,7 +4,7 @@ import (
 	"os"
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
+	co "github.com/felberj/binemu/kernel/common"
 )
 
 func (k *PosixKernel) Getegid() int {

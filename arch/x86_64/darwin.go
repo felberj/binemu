@@ -3,16 +3,16 @@ package x86_64
 import (
 	"encoding/binary"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/lunixbochs/usercorn/arch/x86"
-	"github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/darwin"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/arch/x86"
+	"github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/darwin"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 type DarwinKernel struct {

@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"syscall"
 
-	"github.com/lunixbochs/usercorn/kernel/common"
+	"github.com/felberj/binemu/kernel/common"
 )
 
 const (

@@ -1,7 +1,7 @@
 package linux
 
 import (
-	co "github.com/lunixbochs/usercorn/kernel/common"
+	co "github.com/felberj/binemu/kernel/common"
 )
 
 func (k *LinuxKernel) Sysinfo(buf co.Obuf) uint64 {

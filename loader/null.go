@@ -3,7 +3,7 @@ package loader
 import (
 	"encoding/binary"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type NullLoader struct {

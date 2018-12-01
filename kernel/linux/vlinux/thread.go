@@ -1,8 +1,8 @@
 package vlinux
 
 import (
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/linux"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/linux"
 )
 
 // SetTidAddress syscall (not implemented)

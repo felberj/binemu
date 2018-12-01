@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/lunixbochs/usercorn/go"
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/loader"
+	"github.com/felberj/binemu/go"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/loader"
 )
 
 type PosixKernel struct {

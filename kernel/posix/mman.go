@@ -5,9 +5,9 @@ import (
 	"os"
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/models/cpu"
-	"github.com/lunixbochs/usercorn/native/enum"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/models/cpu"
+	"github.com/felberj/binemu/native/enum"
 )
 
 func (k *PosixKernel) Mmap(addrHint, size uint64, prot enum.MmapProt, flags enum.MmapFlag, fd co.Fd, off co.Off) uint64 {

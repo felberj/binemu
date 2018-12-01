@@ -23,12 +23,6 @@
 #   non-go = false
 #   go-tests = true
 #   unused-packages = true
-
-
-[[constraint]]
-  name = "github.com/bnagy/gapstone"
-  version = "3.0.3"
-
 [[constraint]]
   name = "github.com/chzyer/readline"
   version = "1.4.0"
@@ -43,7 +37,7 @@
 
 [[constraint]]
   name = "github.com/jroimartin/gocui"
-  version = "0.3.0"
+  branch = "master"
 
 [[constraint]]
   branch = "master"
@@ -92,10 +86,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/shibukawa/configdir"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/unicorn-engine/unicorn"
 
 [prune]
   go-tests = true

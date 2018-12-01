@@ -1,7 +1,7 @@
 package mach
 
 import (
-	co "github.com/lunixbochs/usercorn/kernel/common"
+	co "github.com/felberj/binemu/kernel/common"
 )
 
 type MachKernel struct {

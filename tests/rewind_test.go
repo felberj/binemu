@@ -3,8 +3,8 @@ package tests
 import (
 	"testing"
 
-	"github.com/lunixbochs/usercorn/go"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/go"
+	"github.com/felberj/binemu/models"
 )
 
 func BenchmarkRewind(b *testing.B) {

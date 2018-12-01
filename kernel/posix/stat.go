@@ -3,8 +3,8 @@ package posix
 import (
 	"syscall"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/models"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/models"
 )
 
 func HandleStat(buf co.Obuf, stat *syscall.Stat_t, u models.Usercorn, large bool) uint64 {

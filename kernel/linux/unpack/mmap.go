@@ -1,9 +1,9 @@
 package unpack
 
 import (
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/native/enum"
+	"github.com/felberj/binemu/native/enum"
 )
 
 var mmapProtMap = map[int]int{

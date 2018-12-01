@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 // OpMemBatch is a collection of reads and writes that occured within a basic block

@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lunixbochs/usercorn"
-	"github.com/lunixbochs/usercorn/cmd"
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	"github.com/felberj/binemu"
+	"github.com/felberj/binemu/cmd"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 var secretPage uint64 = 0x4347c000

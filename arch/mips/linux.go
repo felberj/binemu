@@ -3,11 +3,11 @@ package mips
 import (
 	"fmt"
 	sysnum "github.com/lunixbochs/ghostrace/ghost/sys/num"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/linux"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/linux"
+	"github.com/felberj/binemu/models"
 )
 
 var LinuxRegs = []int{uc.MIPS_REG_A0, uc.MIPS_REG_A1, uc.MIPS_REG_A2, uc.MIPS_REG_A3, 0, 0}

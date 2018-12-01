@@ -7,7 +7,7 @@ import (
 
 	"github.com/lunixbochs/struc"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 const (

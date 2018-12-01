@@ -3,7 +3,7 @@ package unpack
 import (
 	"syscall"
 
-	"github.com/lunixbochs/usercorn/native/enum"
+	"github.com/felberj/binemu/native/enum"
 )
 
 var fileModeMap = map[int]int{

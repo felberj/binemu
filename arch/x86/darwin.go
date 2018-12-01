@@ -2,11 +2,11 @@ package x86
 
 import (
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/darwin"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/darwin"
+	"github.com/felberj/binemu/models"
 )
 
 const (

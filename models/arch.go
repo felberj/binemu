@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/lunixbochs/fvbommel-util/sortorder"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 // platform interfaces

@@ -3,7 +3,7 @@ package models
 import (
 	"encoding/binary"
 
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 type Task interface {

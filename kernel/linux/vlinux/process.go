@@ -1,6 +1,6 @@
 package vlinux
 
-import "github.com/lunixbochs/usercorn/models"
+import "github.com/felberj/binemu/models"
 
 // Exit sycall
 func (k *VirtualLinuxKernel) Exit(code uint64) {

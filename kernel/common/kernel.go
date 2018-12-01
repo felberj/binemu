@@ -7,7 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/lunixbochs/argjoy"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type KernelBase struct {

@@ -60,7 +60,7 @@ deps: deps/lib/libunicorn.1.$(LIBEXT) deps/lib/libcapstone.3.$(LIBEXT) deps/lib/
 export CGO_CFLAGS = -I$(DEST)/include
 export CGO_LDFLAGS = -L$(DEST)/lib
 
-PKGS=$(shell go list .//... | sort -u | rev | sed -e 's,og/.*$$,,' | rev | sed -e 's,^,github.com/lunixbochs/usercorn/go,')
+PKGS=$(shell go list .//... | sort -u | rev | sed -e 's,og/.*$$,,' | rev | sed -e 's,^,github.com/felberj/binemu/go,')
 
 vendor: Gopkg.toml
 	dep ensure

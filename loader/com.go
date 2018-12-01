@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 type ComLoader struct {

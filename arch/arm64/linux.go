@@ -3,11 +3,11 @@ package arm64
 import (
 	"fmt"
 	sysnum "github.com/lunixbochs/ghostrace/ghost/sys/num"
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 
-	"github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/linux"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/linux"
+	"github.com/felberj/binemu/models"
 )
 
 var LinuxRegs = []int{uc.ARM64_REG_X0, uc.ARM64_REG_X1, uc.ARM64_REG_X2, uc.ARM64_REG_X3, uc.ARM64_REG_X4, uc.ARM64_REG_X5}

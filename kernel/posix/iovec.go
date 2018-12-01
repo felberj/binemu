@@ -1,7 +1,7 @@
 package posix
 
 import (
-	co "github.com/lunixbochs/usercorn/kernel/common"
+	co "github.com/felberj/binemu/kernel/common"
 )
 
 type Iovec32 struct {

@@ -1,7 +1,7 @@
 package cpu
 
 import (
-	uc "github.com/unicorn-engine/unicorn/bindings/go/unicorn"
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 // base hook enums on Unicorn's for simplicity

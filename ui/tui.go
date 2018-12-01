@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/lunixbochs/usercorn/lua"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/lua"
+	"github.com/felberj/binemu/models"
 )
 
 type Tui struct {

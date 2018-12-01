@@ -3,7 +3,7 @@ package run
 import (
 	"os"
 
-	"github.com/lunixbochs/usercorn/cmd"
+	"github.com/felberj/binemu/cmd"
 )
 
 func Main(args []string) {

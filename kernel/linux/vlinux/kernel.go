@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/felberj/ramfs"
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/kernel/linux"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/kernel/linux"
 )
 
 // MinusOne represents -1 when interpreted as signed integer.

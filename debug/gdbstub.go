@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lunixbochs/usercorn/models"
-	"github.com/lunixbochs/usercorn/models/cpu"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/models/cpu"
 )
 
 func escape(p []byte) []byte {

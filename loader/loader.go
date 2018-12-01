@@ -4,7 +4,7 @@ import (
 	"debug/dwarf"
 	"encoding/binary"
 
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/models"
 )
 
 // NoOSHint indicates that there is no os hint

@@ -3,15 +3,15 @@ package arch
 import (
 	"github.com/pkg/errors"
 
-	"github.com/lunixbochs/usercorn/arch/arm"
-	"github.com/lunixbochs/usercorn/arch/arm64"
-	"github.com/lunixbochs/usercorn/arch/m68k"
-	"github.com/lunixbochs/usercorn/arch/mips"
-	"github.com/lunixbochs/usercorn/arch/sparc"
-	"github.com/lunixbochs/usercorn/arch/x86"
-	"github.com/lunixbochs/usercorn/arch/x86_16"
-	"github.com/lunixbochs/usercorn/arch/x86_64"
-	"github.com/lunixbochs/usercorn/models"
+	"github.com/felberj/binemu/arch/arm"
+	"github.com/felberj/binemu/arch/arm64"
+	"github.com/felberj/binemu/arch/m68k"
+	"github.com/felberj/binemu/arch/mips"
+	"github.com/felberj/binemu/arch/sparc"
+	"github.com/felberj/binemu/arch/x86"
+	"github.com/felberj/binemu/arch/x86_16"
+	"github.com/felberj/binemu/arch/x86_64"
+	"github.com/felberj/binemu/models"
 )
 
 var archMap = map[string]*models.Arch{

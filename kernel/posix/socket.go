@@ -6,8 +6,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	co "github.com/lunixbochs/usercorn/kernel/common"
-	"github.com/lunixbochs/usercorn/native"
+	co "github.com/felberj/binemu/kernel/common"
+	"github.com/felberj/binemu/native"
 )
 
 func (k *PosixKernel) Socket(domain, typ, protocol int) uint64 {
