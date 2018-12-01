@@ -53,7 +53,6 @@ func NewWriter(w io.WriteCloser, u models.Usercorn) (*TraceWriter, error) {
 		Magic:   TRACE_MAGIC,
 		Version: 1,
 		Arch:    u.Loader().Arch(),
-		OS:      u.Loader().OS(),
 
 		CodeOrderNum:  num,
 		DataOrderNum:  num,

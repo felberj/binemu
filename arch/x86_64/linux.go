@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 	"github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
 	"github.com/felberj/binemu/kernel/linux/vlinux"
 	"github.com/felberj/binemu/models"
 	"github.com/felberj/binemu/models/cpu"
-	"github.com/pkg/errors"
 	uc "github.com/felberj/binemu/unicorn"
+	"github.com/lunixbochs/ghostrace/ghost/sys/num"
+	"github.com/pkg/errors"
 )
 
 // LinuxAMD64Kernel implements AMD64 specific syscalls (like stetting up GS and FS)
@@ -71,7 +71,6 @@ func (k *LinuxAMD64Kernel) ArchPrctl(code int, addr uint64) {
 	fsmsr := uint64(0xC0000100)
 	//	gsmsr := uint64(0xC0000101)
 
-	log.Printf("code 0x%x, addr: 0x%x", code, addr)
 	//	var tmp [8]byte
 	// TODO: make SET check for valid mapped memory
 	switch code {

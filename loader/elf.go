@@ -37,6 +37,7 @@ type ElfLoader struct {
 
 var elfMagic = []byte{0x7f, 0x45, 0x4c, 0x46}
 
+// MatchElf returns true if the file has a elf magic header
 func MatchElf(r io.ReaderAt) bool {
 	return bytes.Equal(getMagic(r), elfMagic)
 }

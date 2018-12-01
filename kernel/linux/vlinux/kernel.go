@@ -8,9 +8,9 @@ import (
 	"net"
 	"os"
 
-	"github.com/felberj/ramfs"
 	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
+	"github.com/felberj/ramfs"
 )
 
 // MinusOne represents -1 when interpreted as signed integer.
@@ -53,9 +53,9 @@ func NewVirtualKernel() *VirtualLinuxKernel {
 }
 
 func (k *VirtualLinuxKernel) initFs() {
-	// Stdout
 	k.Fds[0] = os.Stdin
 	k.Fds[1] = os.Stdout
+	k.Fds[2] = os.Stderr
 	k.nextfd = 3
 }
 

@@ -1,14 +1,12 @@
 package usercorn
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	rdebug "runtime/debug"
-	"strings"
 	"sync"
 
 	"github.com/felberj/binemu/arch"
@@ -76,6 +74,79 @@ type Usercorn struct {
 	rewind   []models.Op
 	inscount uint64
 }
+
+// NewUsercornWrapper is just a hacky woraround that usercorn has privat fields.
+// TODO(felberj) remove
+func NewUsercornWrapper(exe string, t *Task, l models.Loader, os *models.OS, c *models.Config) *Usercorn {
+	u := &Usercorn{
+		Task:   t,
+		config: c,
+		loader: l,
+		exit:   0xffffffffffffffff,
+		debug:  debug.NewDebug(l.Arch(), c),
+	}
+	u.memio = memio.NewMemIO(
+		// ReadAt() callback
+		func(p []byte, addr uint64) (int, error) {
+			if err := u.Task.MemReadInto(p, addr); err != nil {
+				return 0, err
+			}
+			return len(p), nil
+		},
+		// WriteAt() callback
+		func(p []byte, addr uint64) (int, error) {
+			if err := u.Task.MemWrite(addr, p); err != nil {
+				return 0, err
+			}
+			return len(p), nil
+		},
+	)
+	u.exe, _ = filepath.Abs(exe)
+
+	var kernels []co.Kernel
+	if os.Kernels != nil {
+		kernelI := os.Kernels(u)
+		for _, k := range kernelI {
+			kernels = append(kernels, k.(co.Kernel))
+		}
+	}
+	u.kernels = kernels
+	return u
+}
+
+// LoadBinary is just a hacky workaround to load the binary into memory.
+func (u *Usercorn) LoadBinary(f *os.File) error {
+	var err error
+	u.interpBase, u.entry, u.base, u.binEntry, err = u.mapBinary(f, false)
+	if err != nil {
+		return err
+	}
+	// find data segment for brk
+	u.brk = 0
+	segments, err := u.loader.Segments()
+	if err != nil {
+		return err
+	}
+	for _, seg := range segments {
+		if seg.Prot&cpu.PROT_WRITE != 0 {
+			addr := u.base + seg.Addr + seg.Size
+			if addr > u.brk {
+				u.brk = addr
+			}
+		}
+	}
+	// TODO: have a "host page size", maybe arch.Align()
+	// TODO: allow setting brk addr for raw Usercorn?
+	if u.brk > 0 {
+		mask := uint64(4096)
+		u.brk = (u.brk + mask) & ^(mask - 1)
+	}
+	// make sure PC is set to entry point for debuggers
+	u.RegWrite(u.Arch().PC, u.Entry())
+	return err
+}
+
+// ------------------ everything below is old code
 
 func NewUsercornRaw(l models.Loader, config *models.Config) (*Usercorn, error) {
 	config = config.Init()
@@ -155,20 +226,6 @@ func NewUsercorn(exe string, config *models.Config) (models.Usercorn, error) {
 	}
 	defer f.Close()
 	l, err := loader.LoadArch(f, "any", config.OSHint)
-	if err == loader.UnknownMagic {
-		f.Seek(0, 0)
-		scanner := bufio.NewScanner(f)
-		if scanner.Scan() {
-			line := scanner.Text()
-			if strings.HasPrefix(line, "#!") && len(line) > 2 {
-				args := strings.Split(line[2:], " ")
-				prefix := append(args[1:], exe)
-				config.PrefixArgs = append(prefix, config.PrefixArgs...)
-				shell := config.PrefixPath(args[0], false)
-				return NewUsercorn(shell, config)
-			}
-		}
-	}
 	if err != nil {
 		return nil, err
 	}
@@ -283,15 +340,6 @@ func (u *Usercorn) HookSysDel(hook *models.SysHook) {
 func (u *Usercorn) Run() error {
 	// TODO: defers are expensive I hear
 	defer func() {
-		if u.trace != nil && u.exitStatus == nil {
-			u.trace.OnExit()
-		}
-		if u.trace != nil {
-			u.trace.Detach()
-		}
-		if u.replay != nil {
-			u.replay.Flush()
-		}
 		for _, v := range u.hooks {
 			u.HookDel(v)
 		}

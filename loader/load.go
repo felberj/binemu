@@ -10,6 +10,22 @@ import (
 	"github.com/felberj/binemu/models"
 )
 
+// Loader returns a loader for the file.
+func Loader(r io.ReaderAt) (models.Loader, error) {
+	if MatchElf(r) {
+		return NewElfLoader(r, "REMOVE", "REMOVE")
+	} else if MatchMachO(r) {
+		return NewMachOLoader(r, "REMOVE")
+	} else if MatchCgc(r) {
+		return NewCgcLoader(r, "REMOVE")
+	} else {
+		return nil, errors.WithStack(UnknownMagic)
+	}
+
+}
+
+// -------------- everything below is old code
+
 var UnknownMagic = errors.New("Could not identify file magic.")
 
 func LoadFile(path string) (models.Loader, error) {

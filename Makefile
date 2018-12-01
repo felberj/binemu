@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := build
 .PHONY: get test cov bench deps usercorn
 
-all: usercorn
+all: binemu
 
 clean:
 	rm -f usercorn
@@ -55,6 +55,12 @@ PKGS=$(shell go list .//... | sort -u | rev | sed -e 's,og/.*$$,,' | rev | sed -
 vendor: Gopkg.toml
 	dep ensure
 	touch vendor
+
+.PHONY: binemu
+binemu: vendor
+	$(LD_ENV) go build -o binemu ./cmd/binemu
+	$(FIXRPATH) binemu
+
 
 usercorn: vendor
 	$(LD_ENV) go build -o usercorn ./cmd/main
