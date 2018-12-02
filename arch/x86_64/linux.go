@@ -108,7 +108,7 @@ func VirtualLinuxKernels(u models.Usercorn) []interface{} {
 	if err := setupVsyscall(u); err != nil {
 		panic(err)
 	}
-	return []interface{}{&LinuxAMD64Kernel{}, vlinux.NewVirtualKernel()}
+	return []interface{}{&LinuxAMD64Kernel{}, vlinux.NewVirtualKernel(u.Fs())}
 }
 
 func LinuxInit(u models.Usercorn, args, env []string) error {

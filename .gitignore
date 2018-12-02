@@ -1,6 +1,8 @@
 deps/
 vendor/
 
+proto_gen/
+
 /binemu
 
 .DS_Store

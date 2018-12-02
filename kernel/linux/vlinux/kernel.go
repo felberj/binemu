@@ -39,10 +39,10 @@ func (f *netFile) Truncate(int64) error {
 }
 
 // NewVirtualKernel creates a Linux Kernel that is isolated from the operating system.
-func NewVirtualKernel() *VirtualLinuxKernel {
+func NewVirtualKernel(fs *ramfs.Filesystem) *VirtualLinuxKernel {
 	kernel := &VirtualLinuxKernel{
 		KernelBase: &co.KernelBase{},
-		Fs:         ramfs.New(),
+		Fs:         fs,
 		Fds:        map[co.Fd]File{},
 	}
 	kernel.Argjoy.Register(func(arg interface{}, vals []interface{}) error {

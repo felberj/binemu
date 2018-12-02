@@ -4,6 +4,7 @@ import (
 	"github.com/lunixbochs/ghostrace/ghost/memio"
 
 	"github.com/felberj/binemu/models/cpu"
+	"github.com/felberj/ramfs"
 )
 
 type SysGetArgs func(n int) ([]uint64, error)
@@ -74,4 +75,6 @@ type Usercorn interface {
 	Syscall(num int, name string, getArgs SysGetArgs) (uint64, error)
 
 	Exit(err error)
+
+	Fs() *ramfs.Filesystem
 }

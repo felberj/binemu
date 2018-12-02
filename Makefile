@@ -76,3 +76,7 @@ cov: vendor
 
 bench: vendor
 	go test -v -benchmem -bench=. ./...
+
+.PHONY: protos
+protos:
+	protoc -I protos/ protos/binemu.proto --go_out=proto_gen/

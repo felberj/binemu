@@ -16,6 +16,7 @@ import (
 	"github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/binemu/models/debug"
 	"github.com/felberj/binemu/models/trace"
+	"github.com/felberj/ramfs"
 	"github.com/lunixbochs/ghostrace/ghost/memio"
 	"github.com/lunixbochs/struc"
 	"github.com/pkg/errors"
@@ -67,6 +68,7 @@ type Usercorn struct {
 
 	hooks    []cpu.Hook
 	sysHooks []*models.SysHook
+	fs       *ramfs.Filesystem
 
 	debug    *debug.Debug
 	trace    *trace.Trace
@@ -77,13 +79,14 @@ type Usercorn struct {
 
 // NewUsercornWrapper is just a hacky woraround that usercorn has privat fields.
 // TODO(felberj) remove
-func NewUsercornWrapper(exe string, t *Task, l models.Loader, os *models.OS, c *models.Config) *Usercorn {
+func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l models.Loader, os *models.OS, c *models.Config) *Usercorn {
 	u := &Usercorn{
 		Task:   t,
 		config: c,
 		loader: l,
 		exit:   0xffffffffffffffff,
 		debug:  debug.NewDebug(l.Arch(), c),
+		fs:     fs,
 	}
 	u.memio = memio.NewMemIO(
 		// ReadAt() callback
@@ -144,6 +147,11 @@ func (u *Usercorn) LoadBinary(f *os.File) error {
 	// make sure PC is set to entry point for debuggers
 	u.RegWrite(u.Arch().PC, u.Entry())
 	return err
+}
+
+// Fs returns the filesystem
+func (u *Usercorn) Fs() *ramfs.Filesystem {
+	return u.fs
 }
 
 // ------------------ everything below is old code

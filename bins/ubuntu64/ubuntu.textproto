@@ -1,0 +1,34 @@
+kernel: 'virtual-linux'
+loader: 'ld-linux-x86-64.so.2'
+files: [
+{
+  host_path: 'libc.so.6'
+  guest_path: '/lib/x86_64-linux-gnu/x86_64/libc.so.6'
+  mode: 511
+},
+{
+  host_path: 'libdl.so.2'
+  guest_path: '/lib/x86_64-linux-gnu/x86_64/libdl.so.2'
+  mode: 511
+},
+{
+  host_path: 'libcrypt.so.1'
+  guest_path: '/lib/x86_64-linux-gnu/x86_64/libcrypt.so.1'
+  mode: 511
+},
+{
+  host_path: 'librt.so.1'
+  guest_path: '/lib/x86_64-linux-gnu/x86_64/librt.so.1'
+  mode: 511
+},
+{
+  host_path: 'libpthread.so.0'
+  guest_path: '/lib/x86_64-linux-gnu/x86_64/libpthread.so.0'
+  mode: 511
+},
+{
+  host_path: 'libtalloc.so.2'
+  guest_path: '/lib/x86_64-linux-gnu/x86_64/libtalloc.so.2'
+  mode: 511
+}
+]

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package binemu;
+
+message Config {
+  string config_dir = 1; // path where this config file is (set by binemu)
+  string kernel = 2; // name of the kernel to use
+  repeated File files = 3; // files that should be mapped into the guest vm
+  string loader = 4; // path to the binary loader (in the host_os)
+}
+
+message File {
+  string host_path = 1;
+  string guest_path = 2;
+  int32 mode = 3;
+}
