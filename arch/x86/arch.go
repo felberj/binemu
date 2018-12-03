@@ -2,20 +2,16 @@ package x86
 
 import (
 	uc "github.com/felberj/binemu/unicorn"
-	cs "github.com/lunixbochs/capstr"
 
-	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/models"
 )
 
 var Arch = &models.Arch{
-	Name:   "x86",
-	Bits:   32,
-	Radare: "x86",
+	Name: "x86",
+	Bits: 32,
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_X86, Mode: uc.MODE_32},
-	Dis: &cpu.Capstr{Arch: cs.ARCH_X86, Mode: cs.MODE_32},
 
 	PC: uc.X86_REG_EIP,
 	SP: uc.X86_REG_ESP,
@@ -53,7 +49,6 @@ var Arch = &models.Arch{
 	DefaultRegs: []string{
 		"eax", "ebx", "ecx", "edx", "esi", "edi", "ebp",
 	},
-	GdbXml: gdbXml,
 }
 
 func Wrmsr(u models.Usercorn, msr, value uint64) {

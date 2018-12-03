@@ -49,14 +49,6 @@ func (t *Task) ByteOrder() binary.ByteOrder {
 	return t.order
 }
 
-func (t *Task) Dis(addr, size uint64, showBytes bool) (string, error) {
-	mem, err := t.MemRead(addr, size)
-	if err != nil {
-		return "", err
-	}
-	return models.Disas(mem, addr, t.arch, showBytes, t.Bsz)
-}
-
 func (t *Task) MemMap(addr, size uint64, prot int) error {
 	_, err := t.Mmap(addr, size, prot, true, "", nil)
 	return err

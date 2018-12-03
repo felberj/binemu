@@ -2,20 +2,16 @@ package arm
 
 import (
 	uc "github.com/felberj/binemu/unicorn"
-	cs "github.com/lunixbochs/capstr"
 
-	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/models"
 )
 
 var Arch = &models.Arch{
-	Name:   "arm",
-	Bits:   32,
-	Radare: "arm",
+	Name: "arm",
+	Bits: 32,
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_ARM, Mode: uc.MODE_ARM},
-	Dis: &cpu.Capstr{Arch: cs.ARCH_ARM, Mode: cs.MODE_ARM},
 
 	PC: uc.ARM_REG_PC,
 	SP: uc.ARM_REG_SP,

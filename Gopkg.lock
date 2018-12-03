@@ -10,6 +10,14 @@
   revision = "4d4e5edb95926de68c44cb23ee2a0e2f07934bdf"
 
 [[projects]]
+  digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  pruneopts = "UT"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:6881215ab12b3471f59f7f1941e317a16b3ebd59fb8595b62d6d643e9622841f"
   name = "github.com/keystone-engine/keystone"
   packages = ["bindings/go/keystone"]
@@ -24,14 +32,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "1ffcd6b41a67aa8d772cca898dcbcc3acb84c5f9"
-
-[[projects]]
-  branch = "master"
-  digest = "1:4f7d0ef64b4d020824d1812b06d635d0b6e0fa2f6dbbebeb2015c96867a83b1e"
-  name = "github.com/lunixbochs/capstr"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "1b6ae95b8ac8c4b5969e5becf590b8ec42dc4091"
 
 [[projects]]
   branch = "master"
@@ -65,9 +65,9 @@
   analyzer-version = 1
   input-imports = [
     "github.com/felberj/ramfs",
+    "github.com/golang/protobuf/proto",
     "github.com/keystone-engine/keystone/bindings/go/keystone",
     "github.com/lunixbochs/argjoy",
-    "github.com/lunixbochs/capstr",
     "github.com/lunixbochs/ghostrace/ghost/memio",
     "github.com/lunixbochs/ghostrace/ghost/sys/num",
     "github.com/lunixbochs/struc",

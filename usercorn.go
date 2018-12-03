@@ -4,22 +4,19 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"runtime"
-	rdebug "runtime/debug"
+	"runtime/debug"
 	"sync"
 
-	"github.com/felberj/binemu/arch"
-	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/loader"
 	"github.com/felberj/binemu/models"
 	"github.com/felberj/binemu/models/cpu"
-	"github.com/felberj/binemu/models/debug"
-	"github.com/felberj/binemu/models/trace"
 	"github.com/felberj/ramfs"
 	"github.com/lunixbochs/ghostrace/ghost/memio"
 	"github.com/lunixbochs/struc"
 	"github.com/pkg/errors"
+
+	co "github.com/felberj/binemu/kernel/common"
 )
 
 // #cgo LDFLAGS: -Wl,-rpath,\$ORIGIN/deps/lib:\$ORIGIN/lib
@@ -33,13 +30,11 @@ type tramp struct {
 type Usercorn struct {
 	*Task
 
-	sync.Mutex
-	config       *models.Config
-	exe          string
-	loader       models.Loader
-	interpLoader models.Loader
-	kernels      []co.Kernel
-	memio        memio.MemIO
+	config  *models.Config
+	exe     string
+	loader  models.Loader
+	kernels []co.Kernel
+	memio   memio.MemIO
 
 	base       uint64
 	interpBase uint64
@@ -61,20 +56,8 @@ type Usercorn struct {
 
 	restart func(models.Usercorn, error) error
 
-	gate models.Gate
-
-	breaks       []*models.Breakpoint
-	futureBreaks []*models.Breakpoint
-
-	hooks    []cpu.Hook
-	sysHooks []*models.SysHook
-	fs       *ramfs.Filesystem
-
-	debug    *debug.Debug
-	trace    *trace.Trace
-	replay   *trace.Replay
-	rewind   []models.Op
-	inscount uint64
+	hooks []cpu.Hook
+	fs    *ramfs.Filesystem
 }
 
 // NewUsercornWrapper is just a hacky woraround that usercorn has privat fields.
@@ -85,7 +68,6 @@ func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l models.Load
 		config: c,
 		loader: l,
 		exit:   0xffffffffffffffff,
-		debug:  debug.NewDebug(l.Arch(), c),
 		fs:     fs,
 	}
 	u.memio = memio.NewMemIO(
@@ -120,7 +102,7 @@ func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l models.Load
 // LoadBinary is just a hacky workaround to load the binary into memory.
 func (u *Usercorn) LoadBinary(f *os.File) error {
 	var err error
-	u.interpBase, u.entry, u.base, u.binEntry, err = u.mapBinary(f, false)
+	u.entry, u.base, u.binEntry, err = u.mapBinary(f)
 	if err != nil {
 		return err
 	}
@@ -155,161 +137,7 @@ func (u *Usercorn) Fs() *ramfs.Filesystem {
 }
 
 // ------------------ everything below is old code
-
-func NewUsercornRaw(l models.Loader, config *models.Config) (*Usercorn, error) {
-	config = config.Init()
-
-	a, OS, err := arch.GetArch(l.Arch(), l.OS())
-	if err != nil {
-		return nil, err
-	}
-	cpu, err := a.Cpu.New()
-	if err != nil {
-		return nil, err
-	}
-	task := NewTask(cpu, a, OS, l.ByteOrder())
-	u := &Usercorn{
-		Task:   task,
-		config: config,
-		loader: l,
-		exit:   0xffffffffffffffff,
-		debug:  debug.NewDebug(l.Arch(), config),
-	}
-	if u.config.Rewind {
-		u.replay = trace.NewReplay(u.arch, u.os, l.ByteOrder(), u.debug)
-		config.Trace.OpCallback = append(config.Trace.OpCallback, u.replay.Feed)
-		if u.config.Rewind {
-			u.rewind = make([]models.Op, 0, 10000)
-			config.Trace.OpCallback = append(config.Trace.OpCallback,
-				func(frame models.Op) {
-					u.rewind = append(u.rewind, frame)
-				})
-		}
-	}
-	u.trace, err = trace.NewTrace(u, &config.Trace)
-	if err != nil {
-		return nil, errors.Wrap(err, "NewTrace() failed")
-	}
-	u.memio = memio.NewMemIO(
-		// ReadAt() callback
-		func(p []byte, addr uint64) (int, error) {
-			if err := u.Task.MemReadInto(p, addr); err != nil {
-				return 0, err
-			}
-			if u.trace != nil && u.config.Trace.Mem {
-				u.trace.OnMemReadSize(addr, uint32(len(p)))
-			}
-			return len(p), nil
-		},
-		// WriteAt() callback
-		func(p []byte, addr uint64) (int, error) {
-			if err := u.Task.MemWrite(addr, p); err != nil {
-				return 0, err
-			}
-			if u.trace != nil && u.config.Trace.Mem {
-				u.trace.OnMemWrite(addr, p)
-			}
-			return len(p), nil
-		},
-	)
-	// load kernels
-	// the array cast is a trick to work around circular imports
-	if OS.Kernels != nil {
-		kernelI := OS.Kernels(u)
-		kernels := make([]co.Kernel, len(kernelI))
-		for i, k := range kernelI {
-			kernels[i] = k.(co.Kernel)
-		}
-		u.kernels = kernels
-	}
-	return u, nil
-}
-
-func NewUsercorn(exe string, config *models.Config) (models.Usercorn, error) {
-	config = config.Init()
-
-	f, err := os.Open(exe)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	l, err := loader.LoadArch(f, "any", config.OSHint)
-	if err != nil {
-		return nil, err
-	}
-	u, err := NewUsercornRaw(l, config)
-	if err != nil {
-		return nil, err
-	}
-	exe, _ = filepath.Abs(exe)
-	u.exe = exe
-	u.loader = l
-
-	// map binary (and interp) into memory
-	u.interpBase, u.entry, u.base, u.binEntry, err = u.mapBinary(f, false)
-	if err != nil {
-		return nil, err
-	}
-	// find data segment for brk
-	u.brk = 0
-	segments, err := l.Segments()
-	if err != nil {
-		return nil, err
-	}
-	for _, seg := range segments {
-		if seg.Prot&cpu.PROT_WRITE != 0 {
-			addr := u.base + seg.Addr + seg.Size
-			if addr > u.brk {
-				u.brk = addr
-			}
-		}
-	}
-	// TODO: have a "host page size", maybe arch.Align()
-	// TODO: allow setting brk addr for raw Usercorn?
-	if u.brk > 0 {
-		mask := uint64(4096)
-		u.brk = (u.brk + mask) & ^(mask - 1)
-	}
-	// make sure PC is set to entry point for debuggers
-	u.RegWrite(u.Arch().PC, u.Entry())
-	return u, nil
-}
-
-func (u *Usercorn) Callstack() []models.Stackframe {
-	if u.replay == nil {
-		return nil
-	}
-	return u.replay.Callstack.Freeze(u.replay.PC, u.replay.SP)
-}
-
-func (u *Usercorn) Rewind(by, addr uint64) error {
-	panic("not implemented")
-}
-
-// Intercept memory read/write into MemIO to make tracing always work.
-// This means Trace needs to use Task().Read() instead
-func (u *Usercorn) MemWrite(addr uint64, p []byte) error {
-	_, err := u.memio.WriteAt(p, addr)
-	return err
-}
-func (u *Usercorn) MemReadInto(p []byte, addr uint64) error {
-	_, err := u.memio.ReadAt(p, addr)
-	return err
-}
-func (u *Usercorn) MemRead(addr, size uint64) ([]byte, error) {
-	p := make([]byte, size)
-	err := u.MemReadInto(p, addr)
-	return p, err
-}
-
-// read without tracing, used by trace and repl
-func (u *Usercorn) DirectRead(addr, size uint64) ([]byte, error) {
-	return u.Task.MemRead(addr, size)
-}
-func (u *Usercorn) DirectWrite(addr uint64, p []byte) error {
-	return u.Task.MemWrite(addr, p)
-}
-
+// HookAdd adds a CPU hook.
 func (u *Usercorn) HookAdd(htype int, cb interface{}, begin, end uint64, extra ...int) (cpu.Hook, error) {
 	hh, err := u.Cpu.HookAdd(htype, cb, begin, end, extra...)
 	if err == nil {
@@ -318,6 +146,7 @@ func (u *Usercorn) HookAdd(htype int, cb interface{}, begin, end uint64, extra .
 	return hh, err
 }
 
+// HookDel removes the hook
 func (u *Usercorn) HookDel(hh cpu.Hook) error {
 	tmp := make([]cpu.Hook, 0, len(u.hooks))
 	for _, v := range u.hooks {
@@ -329,22 +158,6 @@ func (u *Usercorn) HookDel(hh cpu.Hook) error {
 	return u.Cpu.HookDel(hh)
 }
 
-func (u *Usercorn) HookSysAdd(before, after models.SysCb) *models.SysHook {
-	hook := &models.SysHook{Before: before, After: after}
-	u.sysHooks = append(u.sysHooks, hook)
-	return hook
-}
-
-func (u *Usercorn) HookSysDel(hook *models.SysHook) {
-	tmp := make([]*models.SysHook, 0, len(u.sysHooks)-1)
-	for _, v := range u.sysHooks {
-		if v != hook {
-			tmp = append(tmp, v)
-		}
-	}
-	u.sysHooks = tmp
-}
-
 func (u *Usercorn) Run() error {
 	// TODO: defers are expensive I hear
 	defer func() {
@@ -352,14 +165,10 @@ func (u *Usercorn) Run() error {
 			u.HookDel(v)
 		}
 		if e := recover(); e != nil {
-			fmt.Printf("\n+++ caught panic +++\n%s\n%s\n\n", e, rdebug.Stack())
+			fmt.Printf("\n+++ caught panic +++\n%s\n%s\n\n", e, debug.Stack())
 			panic(e)
 		}
 	}()
-	// PrefixArgs was added for shebang
-	if len(u.config.PrefixArgs) > 0 {
-		u.config.Args = append(u.config.PrefixArgs, u.config.Args...)
-	}
 	// TODO: hooks are removed below but if Run() is called again the OS stack will be reinitialized
 	// maybe won't be a problem if the stack is zeroed and stack pointer is reset?
 	// or OS stack init can be moved somewhere else (like NewUsercorn)
@@ -368,18 +177,8 @@ func (u *Usercorn) Run() error {
 			return err
 		}
 	}
-	if u.config.Trace.Any() {
-		if err := u.trace.Attach(); err != nil {
-			return err
-		}
-	}
 	if err := u.addHooks(); err != nil {
 		return err
-	}
-	if u.config.InsCount {
-		u.HookAdd(cpu.HOOK_CODE, func(_ cpu.Cpu, addr uint64, size uint32) {
-			u.inscount++
-		}, 1, 0)
 	}
 	// in case this isn't the first run
 	u.exitStatus = nil
@@ -387,16 +186,8 @@ func (u *Usercorn) Run() error {
 	u.RegWrite(u.arch.PC, u.entry)
 	var err error
 	for err == nil && u.exitStatus == nil {
-		// well there's a huge pile of sync here to make sure everyone's ready to go...
-		u.gate.Start()
-		// allow a repl to break us out with u.Exit() before we run
-		if u.exitStatus != nil {
-			break
-		}
-		// allow repl or rewind to change pc
 		pc, _ := u.RegRead(u.arch.PC)
 		err = u.Start(pc, u.exit)
-		u.gate.Stop()
 
 		if u.restart != nil {
 			err = u.restart(u, err)
@@ -429,17 +220,10 @@ func (u *Usercorn) Run() error {
 			fmt.Printf("got error: %v", err)
 		}
 	}
-	if u.config.InsCount {
-		u.Printf("inscount: %d\n", u.inscount)
-	}
 	if err == nil && u.exitStatus != nil {
 		err = u.exitStatus
 	}
 	return err
-}
-
-func (u *Usercorn) Gate() *models.Gate {
-	return &u.gate
 }
 
 func (u *Usercorn) Start(pc, end uint64) error {
@@ -455,11 +239,6 @@ func (u *Usercorn) Exe() string {
 
 func (u *Usercorn) Loader() models.Loader {
 	return u.loader
-}
-
-func (u *Usercorn) InterpBase() uint64 {
-	// points to interpreter base or 0
-	return u.interpBase
 }
 
 func (u *Usercorn) Base() uint64 {
@@ -483,10 +262,6 @@ func (u *Usercorn) SetExit(exit uint64) {
 func (u *Usercorn) BinEntry() uint64 {
 	// points to binary entry, even if an interpreter is used
 	return u.binEntry
-}
-
-func (u *Usercorn) PrefixPath(path string, force bool) string {
-	return u.config.PrefixPath(path, force)
 }
 
 func (u *Usercorn) Brk(addr uint64) (uint64, error) {
@@ -518,15 +293,15 @@ func (u *Usercorn) addHooks() error {
 	u.HookAdd(invalid, func(_ cpu.Cpu, access int, addr uint64, size int, value int64) bool {
 		switch access {
 		case cpu.MEM_WRITE_UNMAPPED, cpu.MEM_WRITE_PROT:
-			u.Printf("invalid write")
+			fmt.Printf("invalid write")
 		case cpu.MEM_READ_UNMAPPED, cpu.MEM_READ_PROT:
-			u.Printf("invalid read")
+			fmt.Printf("invalid read")
 		case cpu.MEM_FETCH_UNMAPPED, cpu.MEM_FETCH_PROT:
-			u.Printf("invalid fetch")
+			fmt.Printf("invalid fetch")
 		default:
-			u.Printf("unknown memory error")
+			fmt.Printf("unknown memory error")
 		}
-		u.Printf(": @0x%x, 0x%x = 0x%x\n", addr, size, uint64(value))
+		fmt.Printf(": @0x%x, 0x%x = 0x%x\n", addr, size, uint64(value))
 		return false
 	}, 1, 0)
 	u.HookAdd(cpu.HOOK_INTR, func(_ cpu.Cpu, intno uint32) {
@@ -535,15 +310,8 @@ func (u *Usercorn) addHooks() error {
 	return nil
 }
 
-func (u *Usercorn) mapBinary(f *os.File, isInterp bool) (interpBase, entry, base, realEntry uint64, err error) {
+func (u *Usercorn) mapBinary(f *os.File) (entry, base, realEntry uint64, err error) {
 	l := u.loader
-	if isInterp {
-		l, err = loader.LoadArch(f, l.Arch(), l.OS())
-		if err != nil {
-			return
-		}
-		u.interpLoader = l
-	}
 	var dynamic bool
 	switch l.Type() {
 	case loader.EXEC:
@@ -551,7 +319,7 @@ func (u *Usercorn) mapBinary(f *os.File, isInterp bool) (interpBase, entry, base
 	case loader.DYN:
 		dynamic = true
 	default:
-		err = errors.New("Unsupported file load type.")
+		err = errors.New("unsupported file load type")
 		return
 	}
 	// find segment bounds
@@ -577,15 +345,7 @@ func (u *Usercorn) mapBinary(f *os.File, isInterp bool) (interpBase, entry, base
 		low = high
 	}
 	// map contiguous binary
-	loadBias := u.config.ForceBase
-	if isInterp {
-		loadBias = u.config.ForceInterpBase
-		// reserve space at end of bin for brk
-		barrier := u.brk + 8*1024*1024
-		if loadBias <= barrier {
-			loadBias = barrier
-		}
-	}
+	loadBias := uint64(0)
 	if dynamic {
 		mapLow := low
 		if loadBias > 0 {
@@ -601,12 +361,8 @@ func (u *Usercorn) mapBinary(f *os.File, isInterp bool) (interpBase, entry, base
 		}
 		loadBias = page.Addr - low
 	}
-	var desc string
-	if isInterp {
-		desc = "interp"
-	} else {
-		desc = "exe"
-	}
+	desc := "exe"
+
 	// initial forced segment mappings
 	for _, seg := range segments {
 		prot := seg.Prot
@@ -643,30 +399,13 @@ outer:
 		if data, err = seg.Data(); err != nil {
 			return
 		}
-		if err = u.MemWrite(loadBias+seg.Addr, data); err != nil {
+		if _, err = u.memio.WriteAt(data, loadBias+seg.Addr); err != nil {
 			return
 		}
 	}
 	entry = loadBias + l.Entry()
 	// load interpreter if present
-	interp := l.Interp()
-	if interp != "" && !isInterp && !u.config.SkipInterp {
-		f, err = os.Open(u.PrefixPath(interp, true))
-		if err != nil {
-			return
-		}
-		defer f.Close()
-		u.brk = high
-		var interpBias, interpEntry uint64
-		_, _, interpBias, interpEntry, err = u.mapBinary(f, true)
-		if u.interpLoader.Arch() != l.Arch() {
-			err = errors.Errorf("Interpreter arch mismatch: %s != %s", l.Arch(), u.interpLoader.Arch())
-			return
-		}
-		return interpBias, interpEntry, loadBias, entry, err
-	} else {
-		return 0, entry, loadBias, entry, nil
-	}
+	return entry, loadBias, entry, nil
 }
 
 func (u *Usercorn) MapStack(base, size uint64, guard bool) error {
@@ -704,14 +443,7 @@ func (u *Usercorn) Kernel(i int) interface{} {
 func (u *Usercorn) Syscall(num int, name string, getArgs models.SysGetArgs) (uint64, error) {
 	if name == "" {
 		msg := fmt.Sprintf("Syscall missing: %d", num)
-		if u.config.StubSyscalls {
-			u.Println(msg)
-		} else {
-			panic(msg)
-		}
-	}
-	if u.config.BlockSyscalls {
-		return 0, nil
+		panic(msg)
 	}
 	for _, k := range u.kernels {
 		if sys := co.Lookup(u, k, name); sys != nil {
@@ -719,40 +451,17 @@ func (u *Usercorn) Syscall(num int, name string, getArgs models.SysGetArgs) (uin
 			if err != nil {
 				return 0, err
 			}
-			desc := sys.Trace(args)
-			prevent := false
-			for _, v := range u.sysHooks {
-				if v.Before(num, name, args, 0, desc) {
-					prevent = true
-				}
-			}
-			if prevent {
-				return 0, nil
-			}
 			ret := sys.Call(args)
-			desc = sys.TraceRet(args, ret)
-			for _, v := range u.sysHooks {
-				v.After(num, name, args, ret, desc)
-			}
 			return ret, nil
 		}
 	}
-	// TODO: hook unknown syscalls?
 	msg := errors.Errorf("Kernel not found for syscall '%s'", name)
-	if u.config.StubSyscalls {
-		u.Println(msg)
-		return 0, nil
-	} else {
-		panic(msg)
-	}
+	panic(msg)
 }
 
 func (u *Usercorn) Exit(err error) {
 	u.exitStatus = err
 	u.Stop()
-	if u.trace != nil {
-		u.trace.OnExit()
-	}
 }
 
 func (u *Usercorn) Close() error {
@@ -777,9 +486,6 @@ func (u *Usercorn) StrucAt(addr uint64) *models.StrucStream {
 
 func (u *Usercorn) Config() *models.Config { return u.config }
 
-func (u *Usercorn) Printf(f string, args ...interface{}) { fmt.Fprintf(u.config.Output, f, args...) }
-func (u *Usercorn) Println(s ...interface{})             { fmt.Fprintln(u.config.Output, s...) }
-
 func (u *Usercorn) Restart(fn func(models.Usercorn, error) error) {
 	u.restart = fn
 	u.Stop()
@@ -796,108 +502,6 @@ func (u *Usercorn) Trampoline(fun func() error) error {
 			fun:  fun,
 		})
 		return u.Stop()
-	} else {
-		return fun()
 	}
-}
-
-// like RunShellcode but you're expected to map memory yourself
-func (u *Usercorn) RunShellcodeMapped(addr uint64, code []byte, setRegs map[int]uint64, regsClobbered []int) error {
-	return u.Trampoline(func() error {
-		if regsClobbered == nil {
-			regsClobbered = make([]int, len(setRegs))
-			pos := 0
-			for reg := range setRegs {
-				regsClobbered[pos] = reg
-				pos++
-			}
-		}
-		// save clobbered regs
-		savedRegs := make([]uint64, len(regsClobbered))
-		for i, reg := range regsClobbered {
-			savedRegs[i], _ = u.RegRead(reg)
-		}
-		// defer restoring saved regs
-		defer func() {
-			for i, reg := range regsClobbered {
-				u.RegWrite(reg, savedRegs[i])
-			}
-		}()
-		// set setRegs
-		for reg, val := range setRegs {
-			u.RegWrite(reg, val)
-		}
-		if err := u.MemWrite(addr, code); err != nil {
-			return err
-		}
-		return u.Start(addr, addr+uint64(len(code)))
-	})
-}
-
-// maps and runs shellcode at addr
-// if regsClobbered is nil, setRegs will be saved/restored
-// if addr is 0, we'll pick one for you
-// if addr is already mapped, we will return an error
-// so non-PIE is your problem
-// will trampoline if unicorn is already running
-func (u *Usercorn) RunShellcode(addr uint64, code []byte, setRegs map[int]uint64, regsClobbered []int) error {
-	size := uint64(len(code))
-	exists := len(u.memsim.Mem.FindRange(addr, size)) > 0
-	if addr != 0 && exists {
-		return errors.Errorf("RunShellcode: 0x%x - 0x%x overlaps mapped memory", addr, addr+uint64(len(code)))
-	}
-	mapped, err := u.Mmap(addr, size, cpu.PROT_ALL, true, "shellcode", nil)
-	if err != nil {
-		return err
-	}
-	defer u.Trampoline(func() error {
-		return u.MemUnmap(mapped, size)
-	})
-	return u.RunShellcodeMapped(mapped, code, setRegs, regsClobbered)
-}
-
-var breakRe = regexp.MustCompile(`^((?P<addr>0x[0-9a-fA-F]+|\d+)|(?P<sym>[\w:]+(?P<off>\+0x[0-9a-fA-F]+|\d+)?)|(?P<source>.+):(?P<line>\d+))(@(?P<file>.+))?$`)
-
-// adds a breakpoint to Usercorn instance
-// see models.Breakpoint for desc syntax
-// future=true adds it to the list of breakpoints to update when new memory is mapped/registered
-func (u *Usercorn) BreakAdd(desc string, future bool, cb func(u models.Usercorn, addr uint64)) (*models.Breakpoint, error) {
-	b, err := models.NewBreakpoint(desc, cb, u)
-	if err != nil {
-		return nil, err
-	}
-	u.breaks = append(u.breaks, b)
-	if future {
-		u.futureBreaks = append(u.futureBreaks, b)
-	}
-	return b, b.Apply()
-}
-
-// TODO: do these sort of operations while holding a lock?
-func (u *Usercorn) BreakDel(b *models.Breakpoint) error {
-	tmp := make([]*models.Breakpoint, 0, len(u.breaks))
-	for _, v := range u.breaks {
-		if v != b {
-			tmp = append(tmp, v)
-		}
-	}
-	u.breaks = tmp
-
-	tmp = make([]*models.Breakpoint, 0, len(u.futureBreaks))
-	for _, v := range u.futureBreaks {
-		if v != b {
-			tmp = append(tmp, v)
-		}
-	}
-	u.futureBreaks = tmp
-
-	return b.Remove()
-}
-
-func (u *Usercorn) Breakpoints() []*models.Breakpoint {
-	return u.breaks
-}
-
-func (u *Usercorn) Symbolicate(addr uint64, includeSource bool) (*models.Symbol, string) {
-	return u.debug.Symbolicate(addr, u.Task.Mappings(), includeSource)
+	return fun()
 }

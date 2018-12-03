@@ -2,20 +2,16 @@ package arm64
 
 import (
 	uc "github.com/felberj/binemu/unicorn"
-	cs "github.com/lunixbochs/capstr"
 
-	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/models"
 )
 
 var Arch = &models.Arch{
-	Name:   "arm64",
-	Bits:   64,
-	Radare: "arm64",
+	Name: "arm64",
+	Bits: 64,
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_ARM64, Mode: uc.MODE_ARM},
-	Dis: &cpu.Capstr{Arch: cs.ARCH_ARM64, Mode: cs.MODE_ARM},
 
 	PC: uc.ARM64_REG_PC,
 	SP: uc.ARM64_REG_SP,

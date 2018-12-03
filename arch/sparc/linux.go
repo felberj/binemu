@@ -2,8 +2,9 @@ package sparc
 
 import (
 	"fmt"
-	"github.com/lunixbochs/ghostrace/ghost/sys/num"
+
 	uc "github.com/felberj/binemu/unicorn"
+	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 
 	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
@@ -18,7 +19,7 @@ type LinuxKernel struct {
 }
 
 func LinuxKernels(u models.Usercorn) []interface{} {
-	kernel := &LinuxKernel{linux.NewKernel()}
+	kernel := &LinuxKernel{linux.NewKernel(u.Fs())}
 	return []interface{}{kernel}
 }
 

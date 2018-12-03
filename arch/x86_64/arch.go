@@ -2,20 +2,16 @@ package x86_64
 
 import (
 	uc "github.com/felberj/binemu/unicorn"
-	cs "github.com/lunixbochs/capstr"
 
-	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/models"
 )
 
 var Arch = &models.Arch{
-	Name:   "x86_64",
-	Bits:   64,
-	Radare: "x86",
+	Name: "x86_64",
+	Bits: 64,
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_X86, Mode: uc.MODE_64},
-	Dis: &cpu.Capstr{Arch: cs.ARCH_X86, Mode: cs.MODE_64},
 
 	PC: uc.X86_REG_RIP,
 	SP: uc.X86_REG_RSP,
@@ -45,5 +41,4 @@ var Arch = &models.Arch{
 		"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 		"rsp", "fs", "gs",
 	},
-	GdbXml: gdbXml,
 }

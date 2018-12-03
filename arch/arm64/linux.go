@@ -2,8 +2,9 @@ package arm64
 
 import (
 	"fmt"
-	sysnum "github.com/lunixbochs/ghostrace/ghost/sys/num"
+
 	uc "github.com/felberj/binemu/unicorn"
+	sysnum "github.com/lunixbochs/ghostrace/ghost/sys/num"
 
 	"github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
@@ -22,7 +23,7 @@ func (k *Arm64LinuxKernel) SetTls(addr uint64) {
 }
 
 func LinuxKernels(u models.Usercorn) []interface{} {
-	kernel := &Arm64LinuxKernel{LinuxKernel: linux.NewKernel()}
+	kernel := &Arm64LinuxKernel{LinuxKernel: linux.NewKernel(u.Fs())}
 	return []interface{}{kernel}
 }
 

@@ -1,150 +1,200 @@
 package linux
 
 import (
-	"github.com/lunixbochs/struc"
+	"crypto/md5"
+	"encoding/binary"
 	"io"
-	"io/ioutil"
 	"os"
-	"path"
 	"syscall"
 
 	co "github.com/felberj/binemu/kernel/common"
-	"github.com/felberj/binemu/kernel/posix"
+	"github.com/felberj/binemu/models"
+	"github.com/felberj/binemu/native/enum"
 )
 
-const UINT64_MAX = 0xFFFFFFFFFFFFFFFF
-
-type fileInfoProxy struct {
-	os.FileInfo
-	name string
+type File interface {
+	io.ReadWriter
+	io.Closer
+	Stat() (os.FileInfo, error)
+	Truncate(int64) error
 }
 
-func (f fileInfoProxy) Name() string {
-	return f.name
+// Readlink syscall
+func (k *LinuxKernel) Readlink(path string, buf co.Obuf, size co.Len) uint64 {
+	var name string
+	if path == "/proc/self/exe" {
+		name = k.U.Exe()
+	} else {
+		panic("Readlink not implemented")
+	}
+	if len(name) > int(size) {
+		name = name[:size]
+	}
+	if err := buf.Pack([]byte(name)); err != nil {
+		return MinusOne
+	}
+	return uint64(len(name))
 }
 
-func (k *LinuxKernel) getdents(dirfd co.Fd, buf co.Obuf, count uint64, bits uint) uint64 {
-	dir, ok := k.Files[dirfd]
+// Access syscall
+func (k *LinuxKernel) Access(path string, mode uint32) uint64 {
+	f, err := k.Fs.Open(path)
+	if err != nil {
+		return MinusOne
+	}
+	defer f.Close()
+	stat, err := f.Stat()
+	if err != nil {
+		return MinusOne
+	}
+	if mode&1 != 0 && stat.Mode()&1 == 0 {
+		return MinusOne
+	}
+	if mode&2 != 0 && stat.Mode()&2 == 0 {
+		return MinusOne
+	}
+	if mode&4 != 0 && stat.Mode()&4 == 0 {
+		return MinusOne
+	}
+	return 0
+}
+
+// Fstat syscall
+func (k *LinuxKernel) Fstat(fd co.Fd, buf co.Obuf) uint64 {
+	f, ok := k.Fds[fd]
 	if !ok {
-		return UINT64_MAX // FIXME
+		return MinusOne
 	}
-	dents := dir.Dirents
-	if dents == nil {
-		dent, err := os.Lstat(path.Join(dir.Path, ".."))
-		if err == nil {
-			dents = append(dents, fileInfoProxy{dent, ".."})
-		}
-		dent, err = os.Lstat(dir.Path)
-		if err == nil {
-			dents = append(dents, fileInfoProxy{dent, "."})
-		}
-		contents, err := ioutil.ReadDir(dir.Path)
+	stat, err := f.Stat()
+	if err != nil {
+		return MinusOne
+	}
+	return handleStat(buf, stat, k.U)
+}
+
+// Write syscall
+func (k *LinuxKernel) Write(fd co.Fd, buf co.Buf, size co.Len) uint64 {
+	vFd, ok := k.Fds[fd]
+	if !ok {
+		return MinusOne
+	}
+	tmp := make([]byte, size)
+	if err := buf.Unpack(tmp); err != nil {
+		return MinusOne
+	}
+	n, err := vFd.Write(tmp)
+	if err != nil {
+		return MinusOne
+	}
+	return uint64(n)
+}
+
+// Writev syscall
+func (k *LinuxKernel) Writev(fd co.Fd, iov co.Buf, count uint64) uint64 {
+	var written uint64
+	for _, vec := range iovecIter(iov, count, k.U.Bits()) {
+		data, _ := k.U.MemRead(vec.Base, vec.Len)
+		n, err := syscall.Write(int(fd), data)
 		if err != nil {
-			return UINT64_MAX // FIXME
+			return MinusOne
 		}
-		dents = append(dents, contents...)
-		dir.Dirents = dents
+		written += uint64(n)
 	}
-	if dir.Offset >= uint64(len(dents)) {
-		return 0
+	return written
+}
+
+// Open syscall
+func (k *LinuxKernel) Open(path string, flags enum.OpenFlag, mode uint64) uint64 {
+	f, err := k.Fs.OpenFile(path, int(flags), os.FileMode(mode))
+	if err != nil {
+		return MinusOne
 	}
-	dents = dents[dir.Offset:]
-	written := 0
-	offset := dir.Offset
-	out := buf.Struc()
-	for i, f := range dents {
-		// TODO: syscall.Stat_t portability?
-		inode := f.Sys().(*syscall.Stat_t).Ino
-		// figure out file mode
-		mode := f.Mode()
-		fileType := DT_REG
-		if f.IsDir() {
-			fileType = DT_DIR
-		} else if mode&os.ModeNamedPipe > 0 {
-			fileType = DT_FIFO
-		} else if mode&os.ModeSymlink > 0 {
-			fileType = DT_LNK
-		} else if mode&os.ModeDevice > 0 {
-			if mode&os.ModeCharDevice > 0 {
-				fileType = DT_CHR
-			} else {
-				fileType = DT_BLK
-			}
-		} else if mode&os.ModeSocket > 0 {
-			fileType = DT_SOCK
+	fd := k.nextfd
+	k.nextfd++
+	k.Fds[fd] = f
+	return uint64(fd)
+}
+
+// Read syscall
+func (k *LinuxKernel) Read(fd co.Fd, buf co.Obuf, size co.Len) uint64 {
+	file, ok := k.Fds[fd]
+	if !ok {
+		return MinusOne
+	}
+	tmp := make([]byte, 1024)
+	var n uint64
+	for i := co.Len(0); i < size; i += 1024 {
+		if i+1024 > size {
+			tmp = tmp[:size-i]
 		}
-		// TODO: does inode get truncated? guess it depends on guest LFS support
-		var ent interface{}
-		if bits == 64 {
-			ent = &Dirent64{inode, dir.Offset + uint64(i), 0, fileType, f.Name() + "\x00"}
-		} else {
-			ent = &Dirent{inode, dir.Offset + uint64(i), 0, f.Name() + "\x00", fileType}
+		count, err := file.Read(tmp)
+		if err != nil {
+			return MinusOne
 		}
-		size, _ := struc.Sizeof(ent)
-		if uint64(written+size) > count {
+		if err := buf.Pack(tmp[:count]); err != nil {
+			return MinusOne
+		}
+		n += uint64(count)
+		if count < 1024 {
 			break
 		}
-		offset++
+	}
+	return n
+}
+
+// Close syscall
+func (k *LinuxKernel) Close(fd co.Fd) uint64 {
+	file, ok := k.Fds[fd]
+	if !ok {
+		return MinusOne
+	}
+	if err := file.Close(); err != nil {
+		return MinusOne
+	}
+	return 0
+}
+
+// Stat syscall
+func (k *LinuxKernel) Stat(path string, buf co.Obuf) uint64 {
+	file, err := k.Fs.Open(path)
+	if err != nil {
+		return MinusOne
+	}
+	stat, err := file.Stat()
+	if err != nil {
+		return MinusOne
+	}
+	return handleStat(buf, stat, k.U)
+}
+
+func handleStat(buf co.Obuf, stat os.FileInfo, u models.Usercorn) uint64 {
+	sum := md5.Sum([]byte(stat.Name()))
+	ino := binary.BigEndian.Uint64(sum[:])
+	s := &LinuxStat64_x86{
+		Ino:     ino,
+		Size:    stat.Size(),
+		Blksize: 1024,
+		Mode:    uint32(stat.Mode()),
+	}
+	return HandleStat(buf, s, u, false)
+}
+
+func iovecIter(stream co.Buf, count uint64, bits uint) []Iovec64 {
+	res := []Iovec64{}
+	st := stream.Struc()
+	for i := uint64(0); i < count; i++ {
 		if bits == 64 {
-			ent.(*Dirent64).Len = size
+			var iovec Iovec64
+			st.Unpack(&iovec)
+			res = append(res, iovec)
 		} else {
-			ent.(*Dirent).Len = size
-		}
-		written += size
-		if err := out.Pack(ent); err != nil {
-			return UINT64_MAX // FIXME
-		}
-	}
-	dir.Offset = offset
-	return uint64(written)
-}
-
-func (k *LinuxKernel) Getdents(dirfd co.Fd, buf co.Obuf, count uint64) uint64 {
-	return k.getdents(dirfd, buf, count, 32)
-}
-
-func (k *LinuxKernel) Getdents64(dirfd co.Fd, buf co.Obuf, count uint64) uint64 {
-	return k.getdents(dirfd, buf, count, 64)
-}
-
-func (k *LinuxKernel) Sendfile(out, in co.Fd, off co.Buf, count uint64) uint64 {
-	// TODO: the in_fd argument must correspond to a file which supports mmap(2)-like operations (i.e., it cannot be a socket).
-	outFile := out.File()
-	inFile := in.File()
-	var offset struc.Off_t
-	if off.Addr != 0 {
-		if err := off.Unpack(&offset); err != nil {
-			return UINT64_MAX // FIXME
+			var iv32 Iovec32
+			st.Unpack(&iv32)
+			res = append(res, Iovec64{
+				Base: uint64(iv32.Base),
+				Len:  uint64(iv32.Len),
+			})
 		}
 	}
-	written, err := io.CopyN(outFile, inFile, int64(count))
-	// TODO: is EOF handling correct here?
-	if (err != nil && err != io.EOF) || written < 0 {
-		return UINT64_MAX // FIXME
-	}
-	return uint64(written)
-}
-
-func (k *LinuxKernel) Fstat64(fd co.Fd, buf co.Obuf) uint64 {
-	var stat syscall.Stat_t
-	if err := syscall.Fstat(int(fd), &stat); err != nil {
-		return posix.Errno(err)
-	}
-	return posix.HandleStat(buf, &stat, k.U, true)
-}
-
-func (k *LinuxKernel) Lstat64(path string, buf co.Obuf) uint64 {
-	var stat syscall.Stat_t
-	if err := syscall.Lstat(path, &stat); err != nil {
-		return posix.Errno(err)
-	}
-	return posix.HandleStat(buf, &stat, k.U, true)
-}
-
-func (k *LinuxKernel) Stat64(path string, buf co.Obuf) uint64 {
-	var stat syscall.Stat_t
-	if err := syscall.Stat(path, &stat); err != nil {
-		return posix.Errno(err)
-	}
-	return posix.HandleStat(buf, &stat, k.U, true)
+	return res
 }

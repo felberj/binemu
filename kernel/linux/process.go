@@ -1,23 +1,19 @@
 package linux
 
-func (k *LinuxKernel) Geteuid32() int {
-	return k.PosixKernel.Geteuid()
+import "github.com/felberj/binemu/models"
+
+// Exit sycall
+func (k *LinuxKernel) Exit(code uint64) {
+	k.U.Exit(models.ExitStatus(code))
 }
 
-func (k *LinuxKernel) Getuid32() int {
-	return k.PosixKernel.Getuid()
+// ExitGroup syscall
+func (k *LinuxKernel) ExitGroup(code uint64) {
+	k.Exit(code)
 }
 
-func (k *LinuxKernel) Getgid32() int {
-	return k.PosixKernel.Getgid()
-}
-
-func (k *LinuxKernel) Setgid32(gid int32) int {
-	return k.PosixKernel.Setgid(int(gid))
-}
-
-func (k *LinuxKernel) Setuid32(uid int32) int {
-	return k.PosixKernel.Setuid(int(uid))
-}
-
+// Ugetrlimit syscall (not implemented)
 func (k *LinuxKernel) Ugetrlimit() {}
+
+// Getrlimit syscall (not implemented)
+func (k *LinuxKernel) Getrlimit() {}

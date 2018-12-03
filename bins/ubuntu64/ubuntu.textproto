@@ -1,4 +1,4 @@
-kernel: 'virtual-linux'
+kernel: 'linux'
 loader: 'ld-linux-x86-64.so.2'
 files: [
 {

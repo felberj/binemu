@@ -34,10 +34,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/lunixbochs/capstr"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/lunixbochs/ghostrace"
 
 [[constraint]]

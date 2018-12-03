@@ -29,5 +29,4 @@ type Task interface {
 	OS() string
 	Bits() uint
 	ByteOrder() binary.ByteOrder
-	Dis(addr, size uint64, showBytes bool) (string, error)
 }

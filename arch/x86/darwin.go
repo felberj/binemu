@@ -1,12 +1,11 @@
 package x86
 
 import (
-	"github.com/lunixbochs/ghostrace/ghost/sys/num"
-	uc "github.com/felberj/binemu/unicorn"
-
 	"github.com/felberj/binemu/kernel/common"
-	"github.com/felberj/binemu/kernel/darwin"
 	"github.com/felberj/binemu/models"
+	"github.com/lunixbochs/ghostrace/ghost/sys/num"
+
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 const (
@@ -17,15 +16,10 @@ const (
 )
 
 func DarwinKernels(u models.Usercorn) []interface{} {
-	return []interface{}{darwin.NewKernel(u)}
+	return []interface{}{}
 }
 
 func DarwinInit(u models.Usercorn, args, env []string) error {
-	if err := darwin.StackInit(u, args, env); err != nil {
-		return err
-	}
-	// FIXME: lib43 crashes if 32-bit darwin gets mach header. maybe I need to align the stack.
-	u.Pop()
 	return nil
 }
 

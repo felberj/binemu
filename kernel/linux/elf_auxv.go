@@ -61,7 +61,7 @@ func setupElfAuxv(u models.Usercorn) ([]ElfAuxv, error) {
 	auxv := []ElfAuxv{
 		// TODO: set/track a page size somewhere - on Arch.OS?
 		{ELF_AT_PAGESZ, 4096},
-		{ELF_AT_BASE, u.InterpBase()},
+		{ELF_AT_BASE, u.Base()},
 		{ELF_AT_FLAGS, 0},
 		{ELF_AT_ENTRY, uint64(u.BinEntry())},
 		{ELF_AT_UID, uint64(os.Getuid())},

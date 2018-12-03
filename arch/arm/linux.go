@@ -88,7 +88,7 @@ func setupTraps(u models.Usercorn, kernel *ArmLinuxKernel) error {
 }
 
 func LinuxKernels(u models.Usercorn) []interface{} {
-	kernel := &ArmLinuxKernel{LinuxKernel: linux.NewKernel()}
+	kernel := &ArmLinuxKernel{LinuxKernel: linux.NewKernel(u.Fs())}
 	// TODO: LinuxInit needs to have a copy of the kernel
 	// honestly init should be part of the kernel?
 	if err := setupTraps(u, kernel); err != nil {

@@ -1,14 +1,12 @@
 package x86
 
 import (
-	"fmt"
+	"github.com/felberj/binemu/kernel/linux"
+	"github.com/felberj/binemu/models"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
-	uc "github.com/felberj/binemu/unicorn"
 
 	co "github.com/felberj/binemu/kernel/common"
-	"github.com/felberj/binemu/kernel/linux"
-	"github.com/felberj/binemu/kernel/posix"
-	"github.com/felberj/binemu/models"
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 const A_PRESENT = 0x80
@@ -95,24 +93,12 @@ type mmapArgs struct {
 	Args []uint64 `struc:"[6]size_t"`
 }
 
-func (k *LinuxKernel) Mmap(buf co.Buf) uint64 {
-	var args mmapArgs
-	if err := buf.Unpack(&args); err != nil {
-		return posix.UINT64_MAX // FIXME
-	}
-	results, err := k.Argjoy.Call(k.PosixKernel.Mmap, args.Args)
-	if err != nil {
-		panic(fmt.Sprintf("LinuxKernel.Mmap(): %v", err))
-	}
-	return results[0].(uint64)
-}
-
 func (k *LinuxKernel) Socketcall(index int, params co.Buf) uint64 {
 	if name, ok := socketCallMap[index]; ok {
 		if sys := co.Lookup(k.U, k, name); sys != nil {
 			rawArgs := make([]uint32, len(sys.In))
 			if err := params.Unpack(rawArgs); err != nil {
-				return posix.UINT64_MAX
+				return linux.MinusOne
 			}
 			args := make([]uint64, len(rawArgs))
 			for i, v := range rawArgs {
@@ -121,7 +107,7 @@ func (k *LinuxKernel) Socketcall(index int, params co.Buf) uint64 {
 			return sys.Call(args)
 		}
 	}
-	return posix.UINT64_MAX // FIXME
+	return linux.MinusOne
 }
 
 func (k *LinuxKernel) SetThreadArea(addr uint64) int {
@@ -151,7 +137,7 @@ func (k *LinuxKernel) setupGdt() {
 }
 
 func LinuxKernels(u models.Usercorn) []interface{} {
-	kernel := &LinuxKernel{LinuxKernel: linux.NewKernel()}
+	kernel := &LinuxKernel{LinuxKernel: linux.NewKernel(u.Fs())}
 	kernel.U = u // hasn't been set by now
 	kernel.setupGdt()
 	return []interface{}{kernel}

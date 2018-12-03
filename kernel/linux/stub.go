@@ -1,6 +1,10 @@
 package linux
 
-func (k *LinuxKernel) Fadvise64() {}
-func (k *LinuxKernel) Utimensat() {}
-func (k *LinuxKernel) Prlimit()   {}
-func (k *LinuxKernel) Prlimit64() {}
+// RtSigaction syscall (not implemented)
+func (k *LinuxKernel) RtSigaction() {}
+
+// RtSigprocmask syscall (not implemented)
+func (k *LinuxKernel) RtSigprocmask() {}
+
+// Alarm syscall (not implemented)
+func (k *LinuxKernel) Alarm(uint64) {}

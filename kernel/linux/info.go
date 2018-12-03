@@ -1,27 +1,11 @@
 package linux
 
 import (
-	"github.com/lunixbochs/struc"
-
 	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/models"
 )
 
-type Sysinfo_t struct {
-	Uptime    struc.Off_t
-	Loads     [3]struc.Size_t
-	Totalram  struc.Size_t
-	Freeram   struc.Size_t
-	Sharedram struc.Size_t
-	Bufferram struc.Size_t
-	Totalswap struc.Size_t
-	Freeswap  struc.Size_t
-	Procs     uint16
-	Totalhigh struc.Size_t
-	Freehigh  struc.Size_t
-	Unit      uint32
-}
-
+// Uname syscall
 func (k *LinuxKernel) Uname(buf co.Buf) {
 	uname := &models.Uname{
 		Sysname:  "Linux",

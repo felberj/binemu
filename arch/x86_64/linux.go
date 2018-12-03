@@ -6,12 +6,12 @@ import (
 
 	"github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
-	"github.com/felberj/binemu/kernel/linux/vlinux"
 	"github.com/felberj/binemu/models"
 	"github.com/felberj/binemu/models/cpu"
-	uc "github.com/felberj/binemu/unicorn"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 	"github.com/pkg/errors"
+
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 // LinuxAMD64Kernel implements AMD64 specific syscalls (like stetting up GS and FS)
@@ -95,20 +95,12 @@ func (k *LinuxAMD64Kernel) ArchPrctl(code int, addr uint64) {
 	}
 }
 
+// LinuxKernels returns a list of kernels to use.
 func LinuxKernels(u models.Usercorn) []interface{} {
-	// TODO: LinuxInit needs to have a copy of the kernel
 	if err := setupVsyscall(u); err != nil {
 		panic(err)
 	}
-	return []interface{}{&LinuxAMD64Kernel{}, linux.NewKernel()}
-}
-
-// VirtualLinuxKernels returns a list of kernels to use.
-func VirtualLinuxKernels(u models.Usercorn) []interface{} {
-	if err := setupVsyscall(u); err != nil {
-		panic(err)
-	}
-	return []interface{}{&LinuxAMD64Kernel{}, vlinux.NewVirtualKernel(u.Fs())}
+	return []interface{}{&LinuxAMD64Kernel{}, linux.NewKernel(u.Fs())}
 }
 
 func LinuxInit(u models.Usercorn, args, env []string) error {
@@ -138,12 +130,6 @@ func init() {
 	Arch.RegisterOS(&models.OS{
 		Name:      "linux",
 		Kernels:   LinuxKernels,
-		Init:      LinuxInit,
-		Interrupt: LinuxInterrupt,
-	})
-	Arch.RegisterOS(&models.OS{
-		Name:      "virtual-linux",
-		Kernels:   VirtualLinuxKernels,
 		Init:      LinuxInit,
 		Interrupt: LinuxInterrupt,
 	})

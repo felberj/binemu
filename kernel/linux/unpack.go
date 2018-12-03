@@ -3,11 +3,11 @@ package linux
 import (
 	"syscall"
 
-	"github.com/lunixbochs/argjoy"
 	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux/unpack"
 	"github.com/felberj/binemu/native"
 	"github.com/felberj/binemu/native/enum"
+	"github.com/lunixbochs/argjoy"
 )
 
 func Unpack(k co.Kernel, arg interface{}, vals []interface{}) error {

@@ -22,7 +22,7 @@ func (k *MipsLinuxKernel) SetThreadArea(addr uint64) error {
 }
 
 func LinuxKernels(u models.Usercorn) []interface{} {
-	kernel := &MipsLinuxKernel{LinuxKernel: linux.NewKernel()}
+	kernel := &MipsLinuxKernel{LinuxKernel: linux.NewKernel(u.Fs())}
 	return []interface{}{kernel}
 }
 

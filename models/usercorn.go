@@ -26,36 +26,14 @@ type Usercorn interface {
 	Task
 	Config() *Config
 	Run() error
-	Trampoline(func() error) error
-
-	Callstack() []Stackframe
-	Restart(func(Usercorn, error) error)
-	Rewind(n, addr uint64) error
-
-	Gate() *Gate
-
-	Printf(fmt string, args ...interface{})
-	Println(s ...interface{})
 
 	Brk(addr uint64) (uint64, error)
 	Mem() memio.MemIO
 	MapStack(base uint64, size uint64, guard bool) error
 	StrucAt(addr uint64) *StrucStream
 
-	DirectRead(addr, size uint64) ([]byte, error)
-	DirectWrite(addr uint64, p []byte) error
-
-	RunShellcodeMapped(addr uint64, code []byte, setRegs map[int]uint64, regsClobbered []int) error
-	RunShellcode(addr uint64, code []byte, setRegs map[int]uint64, regsClobbered []int) error
-
-	BreakAdd(desc string, future bool, cb func(u Usercorn, addr uint64)) (*Breakpoint, error)
-	BreakDel(b *Breakpoint) error
-	Breakpoints() []*Breakpoint
-	Symbolicate(addr uint64, includeSource bool) (*Symbol, string)
-
 	Exe() string
 	Loader() Loader
-	InterpBase() uint64
 	Base() uint64
 	Entry() uint64
 	BinEntry() uint64
@@ -63,11 +41,6 @@ type Usercorn interface {
 	SetExit(exit uint64)
 	Kernel(i int) interface{}
 
-	// TODO: PrefixPath will be replaced by a full VFS subsystem
-	PrefixPath(s string, force bool) string
-
-	HookSysAdd(before, after SysCb) *SysHook
-	HookSysDel(cb *SysHook)
 	HookMapAdd(mapCb MapCb, unmapCb UnmapCb, protCb ProtCb) *MapHook
 	HookMapDel(cb *MapHook)
 

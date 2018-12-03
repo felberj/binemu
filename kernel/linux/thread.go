@@ -1,8 +1,6 @@
 package linux
 
 import (
-	"fmt"
-
 	co "github.com/felberj/binemu/kernel/common"
 )
 
@@ -30,7 +28,16 @@ const (
 
 var ENOSYS = 33
 
-// timeout is a co.Buf here because some forms of futex don't pass it
+// SetTidAddress syscall (not implemented)
+func (k *LinuxKernel) SetTidAddress(tidptr co.Buf) uint64 {
+	return 0
+}
+
+// SetRobustList syscall (not implemented)
+func (k *LinuxKernel) SetRobustList(tid int, head co.Buf) {}
+
+// Futex syscall
+// Timeout is a co.Buf here because some forms of futex don't pass it
 func (k *LinuxKernel) Futex(uaddr co.Buf, op, val int, timeout, uaddr2 co.Buf, val3 uint64) int {
 	if op&FUTEX_CLOCK_REALTIME != 0 {
 		return -ENOSYS
@@ -44,26 +51,4 @@ func (k *LinuxKernel) Futex(uaddr co.Buf, op, val int, timeout, uaddr2 co.Buf, v
 		return -1
 	}
 	return 0
-}
-
-func (k *LinuxKernel) SetTidAddress(tidptr co.Buf) uint64 {
-	return 0
-}
-
-/*
-long get_robust_list(int pid, struct robust_list_head **head_ptr,
-                     size_t *len_ptr);
-long set_robust_list(struct robust_list_head *head, size_t len);
-*/
-
-func (k *LinuxKernel) SetRobustList(tid int, head co.Buf)              {}
-func (k *LinuxKernel) GetRobustList(tid int, head co.Buf, size co.Off) {}
-
-func (k *LinuxKernel) Clone(flags uint64, stack, ptid, ctid, regs co.Buf) {
-	var uregs [18]uint32
-	regs.Unpack(&uregs)
-	for i, v := range uregs {
-		fmt.Printf("reg[%d] %#x\n", i, v)
-	}
-	panic("clone unimplemented")
 }

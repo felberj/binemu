@@ -8,10 +8,6 @@ import (
 	uc "github.com/felberj/binemu/unicorn"
 )
 
-// platform interfaces
-type Dis interface {
-	Dis(mem []byte, addr uint64) ([]Ins, error)
-}
 type CpuBuilder interface {
 	New() (cpu.Cpu, error)
 }
@@ -40,18 +36,15 @@ func (r regMap) Items() regList {
 }
 
 type Arch struct {
-	Name   string
-	Bits   int
-	Radare string
+	Name string
+	Bits int
 
 	Cpu CpuBuilder
-	Dis Dis
 
-	PC     int
-	SP     int
-	OS     map[string]*OS
-	Regs   regMap
-	GdbXml string
+	PC   int
+	SP   int
+	OS   map[string]*OS
+	Regs regMap
 
 	DefaultRegs []string
 

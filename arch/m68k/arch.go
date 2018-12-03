@@ -1,23 +1,17 @@
 package m68k
 
 import (
-	// cs "github.com/lunixbochs/capstr"
-	// ks "github.com/keystone-engine/keystone/bindings/go/keystone"
-	uc "github.com/felberj/binemu/unicorn"
-
-	// "github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/models"
+
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 var Arch = &models.Arch{
-	Name:   "m68k",
-	Bits:   32,
-	Radare: "m68k",
+	Name: "m68k",
+	Bits: 32,
 
 	Cpu: &unicorn.Builder{Arch: uc.ARCH_M68K, Mode: uc.MODE_BIG_ENDIAN},
-	// no capstone support for m68k
-	Dis: nil,
 
 	PC: uc.M68K_REG_PC,
 	SP: uc.M68K_REG_A7,
