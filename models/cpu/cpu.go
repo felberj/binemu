@@ -1,6 +1,8 @@
 package cpu
 
 import (
+	"io"
+
 	uc "github.com/felberj/binemu/unicorn"
 )
 
@@ -13,9 +15,7 @@ type Cpu interface {
 	MemRegions() ([]*uc.MemRegion, error)
 
 	// memory IO
-	MemRead(addr, size uint64) ([]byte, error)
-	MemReadInto(p []byte, addr uint64) error
-	MemWrite(addr uint64, p []byte) error
+	Mem() io.ReadWriteSeeker
 
 	// register IO
 	RegRead(reg int) (uint64, error)

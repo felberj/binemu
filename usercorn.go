@@ -2,6 +2,7 @@ package usercorn
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -12,7 +13,6 @@ import (
 	"github.com/felberj/binemu/models"
 	"github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/ramfs"
-	"github.com/lunixbochs/ghostrace/ghost/memio"
 	"github.com/lunixbochs/struc"
 	"github.com/pkg/errors"
 
@@ -34,7 +34,6 @@ type Usercorn struct {
 	exe     string
 	loader  models.Loader
 	kernels []co.Kernel
-	memio   memio.MemIO
 
 	base       uint64
 	interpBase uint64
@@ -70,22 +69,6 @@ func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l models.Load
 		exit:   0xffffffffffffffff,
 		fs:     fs,
 	}
-	u.memio = memio.NewMemIO(
-		// ReadAt() callback
-		func(p []byte, addr uint64) (int, error) {
-			if err := u.Task.MemReadInto(p, addr); err != nil {
-				return 0, err
-			}
-			return len(p), nil
-		},
-		// WriteAt() callback
-		func(p []byte, addr uint64) (int, error) {
-			if err := u.Task.MemWrite(addr, p); err != nil {
-				return 0, err
-			}
-			return len(p), nil
-		},
-	)
 	u.exe, _ = filepath.Abs(exe)
 
 	var kernels []co.Kernel
@@ -137,6 +120,7 @@ func (u *Usercorn) Fs() *ramfs.Filesystem {
 }
 
 // ------------------ everything below is old code
+
 // HookAdd adds a CPU hook.
 func (u *Usercorn) HookAdd(htype int, cb interface{}, begin, end uint64, extra ...int) (cpu.Hook, error) {
 	hh, err := u.Cpu.HookAdd(htype, cb, begin, end, extra...)
@@ -159,7 +143,6 @@ func (u *Usercorn) HookDel(hh cpu.Hook) error {
 }
 
 func (u *Usercorn) Run() error {
-	// TODO: defers are expensive I hear
 	defer func() {
 		for _, v := range u.hooks {
 			u.HookDel(v)
@@ -394,12 +377,14 @@ outer:
 		merged = append(merged, s)
 	}
 	// write segment memory
+	mem := u.Mem()
 	var data []byte
 	for _, seg := range segments {
 		if data, err = seg.Data(); err != nil {
 			return
 		}
-		if _, err = u.memio.WriteAt(data, loadBias+seg.Addr); err != nil {
+		mem.Seek(int64(loadBias+seg.Addr), io.SeekStart)
+		if _, err = mem.Write(data); err != nil {
 			return
 		}
 	}
@@ -472,16 +457,14 @@ func (u *Usercorn) Close() error {
 	return err
 }
 
-func (u *Usercorn) Mem() memio.MemIO {
-	return u.memio
-}
-
 func (u *Usercorn) StrucAt(addr uint64) *models.StrucStream {
 	options := &struc.Options{
 		Order:   u.ByteOrder(),
 		PtrSize: int(u.Bits()),
 	}
-	return models.NewStrucStream(u.Mem().StreamAt(addr), options)
+	r := u.Mem()
+	r.Seek(int64(addr), io.SeekStart)
+	return models.NewStrucStream(r, options)
 }
 
 func (u *Usercorn) Config() *models.Config { return u.config }

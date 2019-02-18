@@ -1,8 +1,8 @@
 package unicorn
 
 import (
-	"github.com/pkg/errors"
 	uc "github.com/felberj/binemu/unicorn"
+	"github.com/pkg/errors"
 
 	"github.com/felberj/binemu/models/cpu"
 )

@@ -58,7 +58,7 @@ func run(c *pb.Config, args []string) error {
 		args = a
 		e, err := fs.Create("/bin/exec")
 		if err != nil {
-			return nil
+			return err
 		}
 		defer e.Close()
 		if _, err := io.Copy(e, f); err != nil {

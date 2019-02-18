@@ -2,6 +2,7 @@ package x86_64
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/felberj/binemu/kernel/common"
@@ -30,17 +31,20 @@ func setupVsyscall(u models.Usercorn) error {
 		return err
 	}
 	// write 'ret' to trap addrs so they return
+	mem := u.Mem()
 	ret := []byte{0xc3}
-	if err := u.MemWrite(vgettimeofday, ret); err != nil {
+	mem.Seek(int64(vgettimeofday), io.SeekStart)
+	if _, err := mem.Write(ret); err != nil {
 		return err
 	}
-	if err := u.MemWrite(vtime, ret); err != nil {
+	mem.Seek(int64(vtime), io.SeekStart)
+	if _, err := mem.Write(ret); err != nil {
 		return err
 	}
-	if err := u.MemWrite(vgetcpu, ret); err != nil {
+	mem.Seek(int64(vgetcpu), io.SeekStart)
+	if _, err := mem.Write(ret); err != nil {
 		return err
 	}
-
 	_, err := u.HookAdd(cpu.HOOK_CODE, func(_ cpu.Cpu, addr uint64, size uint32) {
 		switch addr {
 		case vgettimeofday:

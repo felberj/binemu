@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"io"
 	"os"
-	"syscall"
 
 	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/models"
@@ -91,10 +90,17 @@ func (k *LinuxKernel) Write(fd co.Fd, buf co.Buf, size co.Len) uint64 {
 
 // Writev syscall
 func (k *LinuxKernel) Writev(fd co.Fd, iov co.Buf, count uint64) uint64 {
+	vFd, ok := k.Fds[fd]
+	if !ok {
+		return MinusOne
+	}
+	mem := k.U.Mem()
 	var written uint64
 	for _, vec := range iovecIter(iov, count, k.U.Bits()) {
-		data, _ := k.U.MemRead(vec.Base, vec.Len)
-		n, err := syscall.Write(int(fd), data)
+		if _, err := mem.Seek(int64(vec.Base), io.SeekStart); err != nil {
+			return MinusOne
+		}
+		n, err := io.CopyN(vFd, mem, int64(vec.Len))
 		if err != nil {
 			return MinusOne
 		}

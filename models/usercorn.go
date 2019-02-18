@@ -1,8 +1,6 @@
 package models
 
 import (
-	"github.com/lunixbochs/ghostrace/ghost/memio"
-
 	"github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/ramfs"
 )
@@ -28,7 +26,6 @@ type Usercorn interface {
 	Run() error
 
 	Brk(addr uint64) (uint64, error)
-	Mem() memio.MemIO
 	MapStack(base uint64, size uint64, guard bool) error
 	StrucAt(addr uint64) *StrucStream
 

@@ -1,6 +1,7 @@
 package linux
 
 import (
+	"io"
 	"log"
 
 	co "github.com/felberj/binemu/kernel/common"
@@ -71,8 +72,11 @@ func (k *LinuxKernel) Mmap(addrHint, size uint64, prot enum.MmapProt, flags enum
 		return MinusOne
 	}
 	if fd > 0 && data != nil {
-		err := k.U.MemWrite(addr, data)
-		if err != nil {
+		mem := k.U.Mem()
+		if _, err := mem.Seek(int64(addr), io.SeekStart); err != nil {
+			return MinusOne
+		}
+		if _, err := mem.Write(data); err != nil {
 			return MinusOne
 		}
 	}

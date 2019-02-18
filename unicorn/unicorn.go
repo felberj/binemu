@@ -1,6 +1,8 @@
 package unicorn
 
 import (
+	"errors"
+	"io"
 	"runtime"
 	"sync"
 	"unsafe"
@@ -40,9 +42,12 @@ type Unicorn interface {
 	MemProtect(addr, size uint64, prot int) error
 	MemUnmap(addr, size uint64) error
 	MemRegions() ([]*MemRegion, error)
+
 	MemRead(addr, size uint64) ([]byte, error)
 	MemReadInto(dst []byte, addr uint64) error
 	MemWrite(addr uint64, data []byte) error
+	Mem() io.ReadWriteSeeker
+
 	RegRead(reg int) (uint64, error)
 	RegReadBatch(regs []int) ([]uint64, error)
 	RegWrite(reg int, value uint64) error
@@ -183,6 +188,44 @@ func (u *uc) MemRegions() ([]*MemRegion, error) {
 	}
 	C.uc_free(unsafe.Pointer(regions))
 	return ret, nil
+}
+
+type memFile struct {
+	off uint64
+	u   *uc
+}
+
+func (m *memFile) Read(p []byte) (int, error) {
+	err := m.u.MemReadInto(p, m.off)
+	m.off += uint64(len(p))
+	return len(p), err
+}
+
+func (m *memFile) Write(p []byte) (int, error) {
+	err := m.u.MemWrite(m.off, p)
+	m.off += uint64(len(p))
+	return len(p), err
+}
+
+func (m *memFile) Seek(off int64, whence int) (int64, error) {
+	offset := uint64(off)
+	switch whence {
+	default:
+		return 0, errors.New("Seek: invalid whence")
+	case io.SeekStart:
+		// offset += s.base
+		// pass
+	case io.SeekCurrent:
+		offset += m.off
+		//	case io.SeekEnd:
+		//		offset += s.limit
+	}
+	m.off = offset
+	return int64(offset), nil
+}
+
+func (u *uc) Mem() io.ReadWriteSeeker {
+	return &memFile{u: u}
 }
 
 func (u *uc) MemWrite(addr uint64, data []byte) error {

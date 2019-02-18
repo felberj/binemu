@@ -2,6 +2,7 @@ package usercorn
 
 import (
 	"encoding/binary"
+	"io"
 	"sort"
 
 	"github.com/pkg/errors"
@@ -161,7 +162,10 @@ func (t *Task) PushBytes(p []byte) (uint64, error) {
 	if err := t.RegWrite(t.arch.SP, sp); err != nil {
 		return 0, err
 	}
-	return sp, t.MemWrite(sp, p)
+	m := t.Cpu.Mem()
+	m.Seek(int64(sp), io.SeekStart)
+	_, err = m.Write(p)
+	return sp, err
 }
 
 func (t *Task) Push(n uint64) (uint64, error) {
@@ -206,18 +210,10 @@ func (t *Task) RegWrite(enum int, val uint64) error {
 	return errors.Wrap(err, "t.RegWrite() failed")
 }
 
-func (t *Task) MemRead(addr, size uint64) ([]byte, error) {
-	data, err := t.Cpu.MemRead(addr, size)
-	return data, errors.Wrap(err, "t.MemRead() failed")
-}
-
-func (t *Task) MemWrite(addr uint64, p []byte) error {
-	err := t.Cpu.MemWrite(addr, p)
-	return errors.Wrap(err, "t.MemWrite() failed")
-}
-
 func (t *Task) MemReadInto(p []byte, addr uint64) error {
-	err := t.Cpu.MemReadInto(p, addr)
+	m := t.Cpu.Mem()
+	m.Seek(int64(addr), io.SeekStart)
+	_, err := m.Read(p)
 	return errors.Wrap(err, "t.MemReadInto() failed")
 }
 
