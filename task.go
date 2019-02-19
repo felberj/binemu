@@ -1,4 +1,4 @@
-package usercorn
+package binemu
 
 import (
 	"encoding/binary"
@@ -7,23 +7,24 @@ import (
 
 	"github.com/pkg/errors"
 
+	cpu "github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/models"
-	"github.com/felberj/binemu/models/cpu"
+	cpum "github.com/felberj/binemu/models/cpu"
 )
 
 type Task struct {
-	cpu.Cpu
+	*cpu.Cpu
 
 	arch     *models.Arch
 	os       *models.OS
 	bits     int
 	Bsz      int
 	order    binary.ByteOrder
-	memsim   cpu.MemSim
+	memsim   cpum.MemSim
 	mapHooks []*models.MapHook
 }
 
-func NewTask(c cpu.Cpu, arch *models.Arch, os *models.OS, order binary.ByteOrder) *Task {
+func NewTask(c *cpu.Cpu, arch *models.Arch, os *models.OS, order binary.ByteOrder) *Task {
 	return &Task{
 		Cpu:   c,
 		arch:  arch,
@@ -79,31 +80,31 @@ func (t *Task) MemUnmap(addr, size uint64) error {
 	return err
 }
 
-func (t *Task) Mappings() cpu.Pages {
+func (t *Task) Mappings() cpum.Pages {
 	return t.memsim.Mem
 }
 
-func (t *Task) MemReserve(addr, size uint64, fixed bool) (*cpu.Page, error) {
+func (t *Task) MemReserve(addr, size uint64, fixed bool) (*cpum.Page, error) {
 	if addr == 0 && !fixed {
 		addr = BASE
 	}
 	addr, size = align(addr, size, true)
 	if fixed {
 		t.MemUnmap(addr, size)
-		page := &cpu.Page{Addr: addr, Size: size, Prot: cpu.PROT_NONE}
+		page := &cpum.Page{Addr: addr, Size: size, Prot: cpum.PROT_NONE}
 		return page, nil
 	}
 	lastPage := ^uint64(0)>>uint8(64-t.bits) - UC_MEM_ALIGN + 2
 	for i := addr; i < lastPage; i += UC_MEM_ALIGN {
 		if len(t.memsim.Mem.FindRange(i, size)) == 0 {
-			page := &cpu.Page{Addr: i, Size: size, Prot: cpu.PROT_NONE}
+			page := &cpum.Page{Addr: i, Size: size, Prot: cpum.PROT_NONE}
 			return page, nil
 		}
 	}
 	return nil, errors.New("failed to reserve memory")
 }
 
-func (t *Task) Mmap(addr, size uint64, prot int, fixed bool, desc string, file *cpu.FileDesc) (uint64, error) {
+func (t *Task) Mmap(addr, size uint64, prot int, fixed bool, desc string, file *cpum.FileDesc) (uint64, error) {
 	aligned, size := align(addr, size, true)
 	if file != nil {
 		file.Off += aligned - addr
@@ -127,15 +128,15 @@ func (t *Task) Mmap(addr, size uint64, prot int, fixed bool, desc string, file *
 }
 
 func (t *Task) Malloc(size uint64, desc string) (uint64, error) {
-	return t.Mmap(0, size, cpu.PROT_READ|cpu.PROT_WRITE, false, desc, nil)
+	return t.Mmap(0, size, cpum.PROT_READ|cpum.PROT_WRITE, false, desc, nil)
 }
 
 func (t *Task) PackAddr(buf []byte, n uint64) ([]byte, error) {
-	return cpu.PackUint(t.order, t.Bsz, buf, n)
+	return cpum.PackUint(t.order, t.Bsz, buf, n)
 }
 
 func (t *Task) UnpackAddr(buf []byte) uint64 {
-	n, err := cpu.UnpackUint(t.order, t.Bsz, buf)
+	n, err := cpum.UnpackUint(t.order, t.Bsz, buf)
 	if err != nil {
 		panic(err)
 	}

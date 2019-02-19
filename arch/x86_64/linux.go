@@ -5,10 +5,11 @@ import (
 	"io"
 	"log"
 
+	cpu "github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
 	"github.com/felberj/binemu/models"
-	"github.com/felberj/binemu/models/cpu"
+	cpum "github.com/felberj/binemu/models/cpu"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 	"github.com/pkg/errors"
 
@@ -27,7 +28,7 @@ func setupVsyscall(u models.Usercorn) error {
 	vgetcpu := base + 0x800
 
 	// handle x86_64 vsyscall traps
-	if err := u.MemMap(base, 0x1000, cpu.PROT_READ|cpu.PROT_EXEC); err != nil {
+	if err := u.MemMap(base, 0x1000, cpum.PROT_READ|cpum.PROT_EXEC); err != nil {
 		return err
 	}
 	// write 'ret' to trap addrs so they return
@@ -45,7 +46,7 @@ func setupVsyscall(u models.Usercorn) error {
 	if _, err := mem.Write(ret); err != nil {
 		return err
 	}
-	_, err := u.HookAdd(cpu.HOOK_CODE, func(_ cpu.Cpu, addr uint64, size uint32) {
+	_, err := u.HookAdd(cpum.HOOK_CODE, func(_ cpu.Cpu, addr uint64, size uint32) {
 		switch addr {
 		case vgettimeofday:
 			ret, _ := u.Syscall(96, "gettimeofday", common.RegArgs(u, AbiRegs))

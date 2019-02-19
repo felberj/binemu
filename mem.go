@@ -1,4 +1,4 @@
-package usercorn
+package binemu
 
 const (
 	BASE         = 0x100000

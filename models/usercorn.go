@@ -1,8 +1,13 @@
 package models
 
 import (
+	"encoding/binary"
+	"io"
+
 	"github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/ramfs"
+
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 type SysGetArgs func(n int) ([]uint64, error)
@@ -21,7 +26,35 @@ type MapHook struct {
 }
 
 type Usercorn interface {
-	Task
+	// CPU
+	Backend() interface{}
+	Mem() io.ReadWriteSeeker
+	RegRead(reg int) (uint64, error)
+	RegWrite(reg int, val uint64) error
+	MemMap(addr, size uint64, prot int) error
+	MemProt(addr, size uint64, prot int) error
+	MemUnmap(addr, size uint64) error
+	MemRegions() ([]*uc.MemRegion, error)
+	HookAdd(htype int, cb interface{}, begin, end uint64, extra ...int) (cpu.Hook, error)
+	// end CPU
+	//	Task
+	Arch() *Arch
+	ByteOrder() binary.ByteOrder
+	RegDump() ([]RegVal, error)
+	Bits() uint
+	PackAddr(buf []byte, n uint64) ([]byte, error)
+	UnpackAddr(buf []byte) uint64
+	PopBytes(p []byte) error
+	PushBytes(p []byte) (uint64, error)
+	Pop() (uint64, error)
+	Push(n uint64) (uint64, error)
+	OS() string
+
+	MemReserve(addr, size uint64, force bool) (*cpu.Page, error)
+	Mmap(addr, size uint64, prot int, fixed bool, desc string, file *cpu.FileDesc) (uint64, error)
+	Malloc(size uint64, desc string) (uint64, error)
+	// end task
+
 	Config() *Config
 	Run() error
 
@@ -36,12 +69,10 @@ type Usercorn interface {
 	BinEntry() uint64
 	SetEntry(entry uint64)
 	SetExit(exit uint64)
-	Kernel(i int) interface{}
 
 	HookMapAdd(mapCb MapCb, unmapCb UnmapCb, protCb ProtCb) *MapHook
 	HookMapDel(cb *MapHook)
 
-	AddKernel(kernel interface{}, first bool)
 	Syscall(num int, name string, getArgs SysGetArgs) (uint64, error)
 
 	Exit(err error)

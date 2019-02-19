@@ -1,6 +1,8 @@
 package x86
 
 import (
+	"log"
+
 	"github.com/felberj/binemu/kernel/linux"
 	"github.com/felberj/binemu/models"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
@@ -147,7 +149,10 @@ func LinuxSyscall(u models.Usercorn) {
 	// TODO: handle errors or something
 	eax, _ := u.RegRead(uc.X86_REG_EAX)
 	name, _ := num.Linux_x86[int(eax)]
-	ret, _ := u.Syscall(int(eax), name, co.RegArgs(u, LinuxRegs))
+	ret, err := u.Syscall(int(eax), name, co.RegArgs(u, LinuxRegs))
+	if err != nil {
+		log.Printf("Error on syscall %q (%d): %v", name, eax, err)
+	}
 	u.RegWrite(uc.X86_REG_EAX, ret)
 }
 

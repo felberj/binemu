@@ -3,13 +3,13 @@ package models
 import (
 	"fmt"
 
-	"github.com/felberj/binemu/models/cpu"
+	cpu "github.com/felberj/binemu/cpu/unicorn"
 
 	uc "github.com/felberj/binemu/unicorn"
 )
 
 type CpuBuilder interface {
-	New() (cpu.Cpu, error)
+	New() (*cpu.Cpu, error)
 }
 
 type Reg struct {
@@ -107,7 +107,7 @@ func (a *Arch) RegEnums() []int {
 }
 
 // FIXME: abstraction hack
-func (a *Arch) RegDumpFast(c cpu.Cpu) ([]uint64, error) {
+func (a *Arch) RegDumpFast(c *cpu.Cpu) ([]uint64, error) {
 	// manual check for Unicorn because Cpu interface doesn't have RegBatch for now
 	if u, ok := c.Backend().(uc.Unicorn); ok {
 		if a.regBatch == nil {
@@ -133,7 +133,7 @@ func (a *Arch) RegDumpFast(c cpu.Cpu) ([]uint64, error) {
 	}
 }
 
-func (a *Arch) RegDump(u cpu.Cpu) ([]RegVal, error) {
+func (a *Arch) RegDump(u *cpu.Cpu) ([]RegVal, error) {
 	regList := a.getRegList()
 	regs, err := a.RegDumpFast(u)
 	if err != nil {

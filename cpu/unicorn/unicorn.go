@@ -1,58 +1,59 @@
 package unicorn
 
 import (
-	uc "github.com/felberj/binemu/unicorn"
 	"github.com/pkg/errors"
 
 	"github.com/felberj/binemu/models/cpu"
+
+	uc "github.com/felberj/binemu/unicorn"
 )
 
 type Builder struct {
 	Arch, Mode int
 }
 
-func (b *Builder) New() (cpu.Cpu, error) {
+func (b *Builder) New() (*Cpu, error) {
 	u, err := uc.NewUnicorn(b.Arch, b.Mode)
 	if err != nil {
 		return nil, errors.Wrap(err, "NewUnicorn() failed")
 	}
-	return &UnicornCpu{u}, nil
+	return &Cpu{u}, nil
 }
 
-type UnicornCpu struct {
+type Cpu struct {
 	uc.Unicorn
 }
 
-func (u *UnicornCpu) Backend() interface{} {
+func (u *Cpu) Backend() interface{} {
 	return u.Unicorn
 }
 
-func (u *UnicornCpu) ContextSave(reuse interface{}) (interface{}, error) {
+func (u *Cpu) ContextSave(reuse interface{}) (interface{}, error) {
 	if reuse == nil {
 		return u.Unicorn.ContextSave(nil)
 	}
 	return u.Unicorn.ContextSave(reuse.(uc.Context))
 }
 
-func (u *UnicornCpu) ContextRestore(ctx interface{}) error {
+func (u *Cpu) ContextRestore(ctx interface{}) error {
 	return u.Unicorn.ContextRestore(ctx.(uc.Context))
 }
 
-func (u *UnicornCpu) HookAdd(htype int, cb interface{}, start uint64, end uint64, extra ...int) (cpu.Hook, error) {
+func (u *Cpu) hookAdd(htype int, cb interface{}, start uint64, end uint64, extra ...int) (cpu.Hook, error) {
 	// have to wrap all hooks to conform to Cpu interface :(
 	// if I fork Unicorn bindings I can remove the cpu arg to make this easier
 	var wrap interface{}
 	switch htype {
 	case cpu.HOOK_BLOCK, cpu.HOOK_CODE:
-		cbc := cb.(func(cpu.Cpu, uint64, uint32))
+		cbc := cb.(func(*Cpu, uint64, uint32))
 		wrap = func(_ uc.Unicorn, addr uint64, size uint32) { cbc(u, addr, size) }
 
 	case cpu.HOOK_MEM_READ, cpu.HOOK_MEM_WRITE, cpu.HOOK_MEM_READ | cpu.HOOK_MEM_WRITE:
-		cbc := cb.(func(cpu.Cpu, int, uint64, int, int64))
+		cbc := cb.(func(*Cpu, int, uint64, int, int64))
 		wrap = func(_ uc.Unicorn, access int, addr uint64, size int, val int64) { cbc(u, access, addr, size, val) }
 
 	case cpu.HOOK_INTR:
-		cbc := cb.(func(cpu.Cpu, uint32))
+		cbc := cb.(func(*Cpu, uint32))
 		wrap = func(_ uc.Unicorn, intno uint32) { cbc(u, intno) }
 
 	case cpu.HOOK_INSN:
@@ -64,7 +65,7 @@ func (u *UnicornCpu) HookAdd(htype int, cb interface{}, start uint64, end uint64
 		if htype&(uc.HOOK_MEM_READ_UNMAPPED|uc.HOOK_MEM_WRITE_UNMAPPED|uc.HOOK_MEM_FETCH_UNMAPPED|
 			uc.HOOK_MEM_READ_PROT|uc.HOOK_MEM_WRITE_PROT|uc.HOOK_MEM_FETCH_PROT) != 0 {
 
-			cbc := cb.(func(cpu.Cpu, int, uint64, int, int64) bool)
+			cbc := cb.(func(*Cpu, int, uint64, int, int64) bool)
 			wrap = func(_ uc.Unicorn, access int, addr uint64, size int, val int64) bool {
 				return cbc(u, access, addr, size, val)
 			}
@@ -75,18 +76,18 @@ func (u *UnicornCpu) HookAdd(htype int, cb interface{}, start uint64, end uint64
 	return u.Unicorn.HookAdd(htype, wrap, start, end, extra...)
 }
 
-func (u *UnicornCpu) HookDel(hh cpu.Hook) error {
+func (u *Cpu) HookDel(hh cpu.Hook) error {
 	return u.Unicorn.HookDel(hh.(uc.Hook))
 }
 
-func (u *UnicornCpu) MemMap(addr, size uint64, prot int) error {
+func (u *Cpu) MemMap(addr, size uint64, prot int) error {
 	return u.Unicorn.MemMapProt(addr, size, prot)
 }
 
-func (u *UnicornCpu) MemProt(addr, size uint64, prot int) error {
+func (u *Cpu) MemProt(addr, size uint64, prot int) error {
 	return u.Unicorn.MemProtect(addr, size, prot)
 }
 
-func (u *UnicornCpu) MemRegions() ([]*uc.MemRegion, error) {
+func (u *Cpu) MemRegions() ([]*uc.MemRegion, error) {
 	return u.Unicorn.MemRegions()
 }

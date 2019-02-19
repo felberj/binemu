@@ -1,4 +1,4 @@
-package usercorn
+package vm
 
 import (
 	"io"
@@ -7,8 +7,6 @@ import (
 
 	"github.com/felberj/binemu/arch"
 	"github.com/felberj/binemu/loader"
-	"github.com/felberj/binemu/models"
-	"github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/ramfs"
 	"github.com/pkg/errors"
 
@@ -19,18 +17,6 @@ import (
 type VM struct {
 	Fs         *ramfs.Filesystem
 	currentPid int
-}
-
-// Process represents a process within a virtual machine
-type Process struct {
-	ID          int
-	Executable  string
-	Args        []string
-	Environment []string
-
-	vm  *VM
-	cpu cpu.Cpu
-	os  *models.OS
 }
 
 // LoadFiles loads the files from the config into the filesytem of the environment.
@@ -47,7 +33,12 @@ func (v *VM) LoadFiles(c *pb.Config) error {
 	return nil
 }
 
-// Process creates a new process
+// Process creates a new process for the provided executable.
+// - create unicorn instance
+// - prepare memory and kernel for the process
+// - load loader into virtual machine (if required)
+// If a loader is required, the binary is written to the filesystem and the entry point
+// it set to the loader.
 func (v *VM) Process(c *pb.Config, exec string, args, envornment []string) (*Process, error) {
 	exe, err := os.Open(exec)
 	if err != nil {
@@ -112,6 +103,7 @@ func (v *VM) Process(c *pb.Config, exec string, args, envornment []string) (*Pro
 		cpu:         cpu,
 		vm:          v,
 		os:          os,
+		arch:        a,
 	}, nil
 
 }

@@ -8,14 +8,15 @@ import (
 	"os"
 	"path"
 
-	usercorn "github.com/felberj/binemu"
 	"github.com/felberj/binemu/arch"
 	"github.com/felberj/binemu/loader"
 	"github.com/felberj/binemu/models"
-	pb "github.com/felberj/binemu/proto_gen"
 	"github.com/felberj/ramfs"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
+
+	usercorn "github.com/felberj/binemu"
+	pb "github.com/felberj/binemu/proto_gen"
 )
 
 var (
@@ -118,6 +119,11 @@ func main() {
 	if len(args) == 0 {
 		log.Fatalf("No program specified")
 	}
+	/*	v := vm.NewVM()
+		p, err := v.Process(&c, args[0], args[1:], nil)
+		if err != nil {
+			log.Fatal(err)
+		}*/
 	if err := run(&c, args); err != nil {
 		log.Fatalf("Error while running the binary: %v", err)
 	}
