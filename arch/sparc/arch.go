@@ -1,17 +1,17 @@
 package sparc
 
 import (
-	uc "github.com/felberj/binemu/unicorn"
-
-	"github.com/felberj/binemu/cpu/unicorn"
+	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/models"
+
+	uc "github.com/felberj/binemu/cpu/unicorn"
 )
 
 var Arch = &models.Arch{
 	Name: "sparc",
 	Bits: 32,
 
-	Cpu: &unicorn.Builder{Arch: uc.ARCH_SPARC, Mode: uc.MODE_SPARC32 | uc.MODE_BIG_ENDIAN},
+	Cpu: &cpu.Builder{Arch: uc.ARCH_SPARC, Mode: uc.MODE_SPARC32 | uc.MODE_BIG_ENDIAN},
 
 	PC: uc.SPARC_REG_PC,
 	SP: uc.SPARC_REG_SP,

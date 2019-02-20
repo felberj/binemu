@@ -3,7 +3,7 @@ package arm64
 import (
 	"fmt"
 
-	uc "github.com/felberj/binemu/unicorn"
+	uc "github.com/felberj/binemu/cpu/unicorn"
 	sysnum "github.com/lunixbochs/ghostrace/ghost/sys/num"
 
 	"github.com/felberj/binemu/kernel/common"

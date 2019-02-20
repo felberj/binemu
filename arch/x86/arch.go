@@ -1,17 +1,17 @@
 package x86
 
 import (
-	uc "github.com/felberj/binemu/unicorn"
-
-	"github.com/felberj/binemu/cpu/unicorn"
+	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/models"
+
+	uc "github.com/felberj/binemu/cpu/unicorn"
 )
 
 var Arch = &models.Arch{
 	Name: "x86",
 	Bits: 32,
 
-	Cpu: &unicorn.Builder{Arch: uc.ARCH_X86, Mode: uc.MODE_32},
+	Cpu: &cpu.Builder{Arch: uc.ARCH_X86, Mode: uc.MODE_32},
 
 	PC: uc.X86_REG_EIP,
 	SP: uc.X86_REG_ESP,

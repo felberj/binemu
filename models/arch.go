@@ -3,9 +3,9 @@ package models
 import (
 	"fmt"
 
-	cpu "github.com/felberj/binemu/cpu/unicorn"
+	"github.com/felberj/binemu/cpu"
 
-	uc "github.com/felberj/binemu/unicorn"
+	uc "github.com/felberj/binemu/cpu/unicorn"
 )
 
 type CpuBuilder interface {

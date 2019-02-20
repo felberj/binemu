@@ -3,12 +3,13 @@ package sparc
 import (
 	"fmt"
 
-	uc "github.com/felberj/binemu/unicorn"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 
-	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
 	"github.com/felberj/binemu/models"
+
+	uc "github.com/felberj/binemu/cpu/unicorn"
+	co "github.com/felberj/binemu/kernel/common"
 )
 
 // TODO: sparc linux syscall abi regs

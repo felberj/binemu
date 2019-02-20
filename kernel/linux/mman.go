@@ -4,9 +4,9 @@ import (
 	"io"
 	"log"
 
+	"github.com/felberj/binemu/cpu"
 	co "github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux/unpack"
-	"github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/binemu/native/enum"
 )
 

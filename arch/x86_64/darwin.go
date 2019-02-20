@@ -1,7 +1,7 @@
 package x86_64
 
 import (
-	uc "github.com/felberj/binemu/unicorn"
+	uc "github.com/felberj/binemu/cpu/unicorn"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 
 	"github.com/felberj/binemu/kernel/common"

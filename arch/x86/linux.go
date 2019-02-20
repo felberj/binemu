@@ -7,8 +7,8 @@ import (
 	"github.com/felberj/binemu/models"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 
+	uc "github.com/felberj/binemu/cpu/unicorn"
 	co "github.com/felberj/binemu/kernel/common"
-	uc "github.com/felberj/binemu/unicorn"
 )
 
 const A_PRESENT = 0x80

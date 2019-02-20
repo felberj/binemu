@@ -9,10 +9,9 @@ import (
 	"runtime/debug"
 	"sync"
 
-	cpu "github.com/felberj/binemu/cpu/unicorn"
+	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/loader"
 	"github.com/felberj/binemu/models"
-	cpum "github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/ramfs"
 	"github.com/lunixbochs/struc"
 	"github.com/pkg/errors"
@@ -96,7 +95,7 @@ func (u *Usercorn) LoadBinary(f *os.File) error {
 		return err
 	}
 	for _, seg := range segments {
-		if seg.Prot&cpum.PROT_WRITE != 0 {
+		if seg.Prot&cpu.PROT_WRITE != 0 {
 			addr := u.base + seg.Addr + seg.Size
 			if addr > u.brk {
 				u.brk = addr
@@ -233,7 +232,7 @@ func (u *Usercorn) Brk(addr uint64) (uint64, error) {
 	cur := u.brk
 	if addr > 0 && addr >= cur {
 		// take brk protections from last brk segment (not sure if this is right)
-		prot := cpum.PROT_READ | cpum.PROT_WRITE
+		prot := cpu.PROT_READ | cpu.PROT_WRITE
 		if brk := u.memsim.Mem.Find(cur); brk != nil {
 			prot = brk.Prot
 			u.brk = brk.Addr + brk.Size
@@ -253,14 +252,13 @@ func (u *Usercorn) Brk(addr uint64) (uint64, error) {
 func (u *Usercorn) addHooks() error {
 	// TODO: this sort of error should be handled in ui module?
 	// issue #244
-	invalid := cpum.HOOK_MEM_ERR
-	u.HookAdd(invalid, func(_ cpu.Cpu, access int, addr uint64, size int, value int64) bool {
+	u.HookAllMemErr(func(access int, addr uint64, size int, value int64) bool {
 		switch access {
-		case cpum.MEM_WRITE_UNMAPPED, cpum.MEM_WRITE_PROT:
+		case cpu.MEM_WRITE_UNMAPPED, cpu.MEM_WRITE_PROT:
 			fmt.Printf("invalid write")
-		case cpum.MEM_READ_UNMAPPED, cpum.MEM_READ_PROT:
+		case cpu.MEM_READ_UNMAPPED, cpu.MEM_READ_PROT:
 			fmt.Printf("invalid read")
-		case cpum.MEM_FETCH_UNMAPPED, cpum.MEM_FETCH_PROT:
+		case cpu.MEM_FETCH_UNMAPPED, cpu.MEM_FETCH_PROT:
 			fmt.Printf("invalid fetch")
 		default:
 			fmt.Printf("unknown memory error")
@@ -268,7 +266,7 @@ func (u *Usercorn) addHooks() error {
 		fmt.Printf(": @0x%x, 0x%x = 0x%x\n", addr, size, uint64(value))
 		return false
 	}, 1, 0)
-	u.HookAdd(cpum.HOOK_INTR, func(_ cpu.Cpu, intno uint32) {
+	u.HookInterrupt(func(intno uint32) {
 		u.os.Interrupt(u, intno)
 	}, 1, 0)
 	return nil
@@ -318,7 +316,7 @@ func (u *Usercorn) mapBinary(f *os.File) (entry, base, realEntry uint64, err err
 			mapLow = 0x1000000
 		}
 		// TODO: is allocating the whole lib width remotely sane?
-		var page *cpum.Page
+		var page *cpu.Page
 		page, err = u.MemReserve(mapLow, high-low, false)
 		if err != nil {
 			return
@@ -332,9 +330,9 @@ func (u *Usercorn) mapBinary(f *os.File) (entry, base, realEntry uint64, err err
 		prot := seg.Prot
 		if prot == 0 {
 			// TODO: confirm why darwin needs this
-			prot = cpum.PROT_ALL
+			prot = cpu.PROT_ALL
 		}
-		fileDesc := &cpum.FileDesc{Name: f.Name(), Off: seg.Off, Len: seg.Size}
+		fileDesc := &cpu.FileDesc{Name: f.Name(), Off: seg.Off, Len: seg.Size}
 		_, err = u.Mmap(loadBias+seg.Addr, seg.Size, prot, true, desc, fileDesc)
 		if err != nil {
 			return
@@ -378,7 +376,7 @@ func (u *Usercorn) MapStack(base, size uint64, guard bool) error {
 	u.StackBase = base
 	u.StackSize = size
 	// TODO: check for NX stack?
-	addr, err := u.Mmap(base, size, cpum.PROT_ALL, true, "stack", nil)
+	addr, err := u.Mmap(base, size, cpu.PROT_ALL, true, "stack", nil)
 	if err != nil {
 		return err
 	}
@@ -387,7 +385,7 @@ func (u *Usercorn) MapStack(base, size uint64, guard bool) error {
 		return err
 	}
 	if guard {
-		_, err := u.Mmap(stackEnd, UC_MEM_ALIGN, cpum.PROT_NONE, true, "stack guard", nil)
+		_, err := u.Mmap(stackEnd, UC_MEM_ALIGN, cpu.PROT_NONE, true, "stack guard", nil)
 		return err
 	}
 	return nil

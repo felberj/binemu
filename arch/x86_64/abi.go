@@ -1,7 +1,7 @@
 package x86_64
 
 import (
-	uc "github.com/felberj/binemu/unicorn"
+	uc "github.com/felberj/binemu/cpu/unicorn"
 	"github.com/pkg/errors"
 
 	"github.com/felberj/binemu/models"

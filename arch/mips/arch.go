@@ -1,17 +1,17 @@
 package mips
 
 import (
-	uc "github.com/felberj/binemu/unicorn"
-
-	"github.com/felberj/binemu/cpu/unicorn"
+	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/models"
+
+	uc "github.com/felberj/binemu/cpu/unicorn"
 )
 
 var Arch = &models.Arch{
 	Name: "mips",
 	Bits: 32,
 
-	Cpu: &unicorn.Builder{Arch: uc.ARCH_MIPS, Mode: uc.MODE_MIPS32 + uc.MODE_LITTLE_ENDIAN},
+	Cpu: &cpu.Builder{Arch: uc.ARCH_MIPS, Mode: uc.MODE_MIPS32 + uc.MODE_LITTLE_ENDIAN},
 
 	PC: uc.MIPS_REG_PC,
 	SP: uc.MIPS_REG_SP,

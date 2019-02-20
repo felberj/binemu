@@ -5,14 +5,14 @@ import (
 	"io"
 	"log"
 
+	"github.com/felberj/binemu/cpu"
 	"github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
 	"github.com/felberj/binemu/models"
-	cpum "github.com/felberj/binemu/models/cpu"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 	"github.com/pkg/errors"
 
-	uc "github.com/felberj/binemu/unicorn"
+	uc "github.com/felberj/binemu/cpu/unicorn"
 )
 
 // LinuxAMD64Kernel implements AMD64 specific syscalls (like stetting up GS and FS)
@@ -27,7 +27,7 @@ func setupVsyscall(u models.Usercorn) error {
 	vgetcpu := base + 0x800
 
 	// handle x86_64 vsyscall traps
-	if err := u.MemMap(base, 0x1000, cpum.PROT_READ|cpum.PROT_EXEC); err != nil {
+	if err := u.MemMap(base, 0x1000, cpu.PROT_READ|cpu.PROT_EXEC); err != nil {
 		return err
 	}
 	// write 'ret' to trap addrs so they return

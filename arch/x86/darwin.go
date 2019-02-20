@@ -5,7 +5,7 @@ import (
 	"github.com/felberj/binemu/models"
 	"github.com/lunixbochs/ghostrace/ghost/sys/num"
 
-	uc "github.com/felberj/binemu/unicorn"
+	uc "github.com/felberj/binemu/cpu/unicorn"
 )
 
 const (
