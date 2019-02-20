@@ -6,12 +6,10 @@ import (
 	"io/ioutil"
 
 	"github.com/pkg/errors"
-
-	"github.com/felberj/binemu/models"
 )
 
-// Loader returns a loader for the file.
-func Loader(r io.ReaderAt) (models.Loader, error) {
+// LoaderFor returns a loader for the file.
+func LoaderFor(r io.ReaderAt) (Loader, error) {
 	if MatchElf(r) {
 		return NewElfLoader(r, "REMOVE", "REMOVE")
 	} else if MatchMachO(r) {
@@ -28,15 +26,15 @@ func Loader(r io.ReaderAt) (models.Loader, error) {
 
 var UnknownMagic = errors.New("Could not identify file magic.")
 
-func LoadFile(path string) (models.Loader, error) {
+func LoadFile(path string) (Loader, error) {
 	return LoadFileArch(path, "any", NoOSHint)
 }
 
-func Load(r io.ReaderAt) (models.Loader, error) {
+func Load(r io.ReaderAt) (Loader, error) {
 	return LoadArch(r, "any", NoOSHint)
 }
 
-func LoadFileArch(path string, arch, osHint string) (models.Loader, error) {
+func LoadFileArch(path string, arch, osHint string) (Loader, error) {
 	p, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -44,7 +42,7 @@ func LoadFileArch(path string, arch, osHint string) (models.Loader, error) {
 	return LoadArch(bytes.NewReader(p), arch, osHint)
 }
 
-func LoadArch(r io.ReaderAt, arch string, osHint string) (models.Loader, error) {
+func LoadArch(r io.ReaderAt, arch string, osHint string) (Loader, error) {
 	if MatchElf(r) {
 		return NewElfLoader(r, arch, osHint)
 	} else if MatchMachO(r) {

@@ -2,11 +2,10 @@ package loader
 
 import (
 	"encoding/binary"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 
-	"github.com/felberj/binemu/models"
+	"github.com/pkg/errors"
 )
 
 type ComLoader struct {
@@ -19,7 +18,7 @@ func (c *ComLoader) OS() string {
 	return "DOS"
 }
 
-func NewComLoader(filename string) (models.Loader, error) {
+func NewComLoader(filename string) (Loader, error) {
 	r, err := os.Open(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open file")
@@ -46,11 +45,11 @@ func NewComLoader(filename string) (models.Loader, error) {
 	}, nil
 }
 
-func (r *ComLoader) Segments() ([]models.SegmentData, error) {
-	var segs []models.SegmentData
+func (r *ComLoader) Segments() ([]SegmentData, error) {
+	var segs []SegmentData
 
 	// Main segment
-	segs = append(segs, models.SegmentData{
+	segs = append(segs, SegmentData{
 		Off:  0,
 		Addr: 0x100,
 		Size: uint64(r.Size),

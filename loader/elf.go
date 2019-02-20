@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/felberj/binemu/models"
 	"github.com/pkg/errors"
 )
 
@@ -42,7 +41,7 @@ func MatchElf(r io.ReaderAt) bool {
 	return bytes.Equal(getMagic(r), elfMagic)
 }
 
-func NewElfLoader(r io.ReaderAt, arch string, osHint string) (models.Loader, error) {
+func NewElfLoader(r io.ReaderAt, arch string, osHint string) (Loader, error) {
 	file, err := elf.NewFile(r)
 	if err != nil {
 		return nil, err
@@ -124,8 +123,8 @@ func (e *ElfLoader) DataSegment() (start, end uint64) {
 	return 0, 0
 }
 
-func (e *ElfLoader) Segments() ([]models.SegmentData, error) {
-	ret := make([]models.SegmentData, 0, len(e.file.Progs))
+func (e *ElfLoader) Segments() ([]SegmentData, error) {
+	ret := make([]SegmentData, 0, len(e.file.Progs))
 	for _, prog := range e.file.Progs {
 		if prog.Type != elf.PT_LOAD {
 			continue
@@ -142,7 +141,7 @@ func (e *ElfLoader) Segments() ([]models.SegmentData, error) {
 		if prog.Flags&elf.PF_X != 0 {
 			prot |= 4
 		}
-		ret = append(ret, models.SegmentData{
+		ret = append(ret, SegmentData{
 			Off:  prog.Off,
 			Addr: prog.Vaddr,
 			Size: prog.Memsz,
@@ -161,14 +160,14 @@ func (e *ElfLoader) Segments() ([]models.SegmentData, error) {
 	return ret, nil
 }
 
-func (e *ElfLoader) getSymbols() ([]models.Symbol, error) {
+func (e *ElfLoader) getSymbols() ([]Symbol, error) {
 	syms, err := e.file.Symbols()
 	if err != nil {
-		return []models.Symbol{}, err
+		return []Symbol{}, err
 	}
-	symbols := make([]models.Symbol, 0, len(syms))
+	symbols := make([]Symbol, 0, len(syms))
 	for _, s := range syms {
-		symbols = append(symbols, models.Symbol{
+		symbols = append(symbols, Symbol{
 			Name:    s.Name,
 			Start:   s.Value,
 			End:     s.Value + s.Size,
@@ -178,7 +177,7 @@ func (e *ElfLoader) getSymbols() ([]models.Symbol, error) {
 	// don't care about missing dyn symtab
 	dyn, _ := e.file.DynamicSymbols()
 	for _, s := range dyn {
-		symbols = append(symbols, models.Symbol{
+		symbols = append(symbols, Symbol{
 			Name:    s.Name,
 			Start:   s.Value,
 			End:     s.Value + s.Size,
@@ -188,7 +187,7 @@ func (e *ElfLoader) getSymbols() ([]models.Symbol, error) {
 	return symbols, nil
 }
 
-func (e *ElfLoader) Symbols() ([]models.Symbol, error) {
+func (e *ElfLoader) Symbols() ([]Symbol, error) {
 	var err error
 	if e.symCache == nil {
 		e.symCache, err = e.getSymbols()

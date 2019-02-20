@@ -3,8 +3,6 @@ package loader
 import (
 	"bytes"
 	"io"
-
-	"github.com/felberj/binemu/models"
 )
 
 var cgcMagic = []byte{0x7f, 0x43, 0x47, 0x43}
@@ -35,14 +33,14 @@ func (f *FakeCgcReader) ReadAt(p []byte, off int64) (int, error) {
 }
 
 type CgcLoader struct {
-	models.Loader
+	Loader
 }
 
 func (c *CgcLoader) OS() string {
 	return "cgc"
 }
 
-func NewCgcLoader(r io.ReaderAt, arch string) (models.Loader, error) {
+func NewCgcLoader(r io.ReaderAt, arch string) (Loader, error) {
 	l, err := NewElfLoader(&FakeCgcReader{r, true}, arch, NoOSHint)
 	return &CgcLoader{l}, err
 }

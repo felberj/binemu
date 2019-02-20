@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/felberj/binemu/cpu"
+	"github.com/felberj/binemu/loader"
 	"github.com/felberj/ramfs"
 
 	uc "github.com/felberj/binemu/cpu/unicorn"
@@ -63,7 +64,7 @@ type Usercorn interface {
 	StrucAt(addr uint64) *StrucStream
 
 	Exe() string
-	Loader() Loader
+	Loader() loader.Loader
 	Base() uint64
 	Entry() uint64
 	BinEntry() uint64

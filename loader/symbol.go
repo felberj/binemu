@@ -1,4 +1,4 @@
-package models
+package loader
 
 type Symbol struct {
 	Name       string

@@ -46,7 +46,7 @@ func run(c *pb.Config, args []string) error {
 		return err
 	}
 	defer f.Close()
-	l, err := loader.Loader(f)
+	l, err := loader.LoaderFor(f)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func run(c *pb.Config, args []string) error {
 			return errors.Wrapf(err, "unable to open loader")
 		}
 		defer f.Close()
-		l, err = loader.Loader(f)
+		l, err = loader.LoaderFor(f)
 		if err != nil {
 			return err
 		}

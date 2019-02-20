@@ -5,10 +5,9 @@ import (
 	"debug/dwarf"
 	"debug/macho"
 	"encoding/binary"
-	"github.com/pkg/errors"
 	"io"
 
-	"github.com/felberj/binemu/models"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -81,7 +80,7 @@ func MatchMachO(r io.ReaderAt) bool {
 	return false
 }
 
-func NewMachOLoader(r io.ReaderAt, archHint string) (models.Loader, error) {
+func NewMachOLoader(r io.ReaderAt, archHint string) (Loader, error) {
 	var (
 		file      *macho.File
 		fatFile   *macho.FatFile
@@ -182,8 +181,8 @@ func (m *MachOLoader) DataSegment() (start, end uint64) {
 	return 0, 0
 }
 
-func (m *MachOLoader) Segments() ([]models.SegmentData, error) {
-	ret := make([]models.SegmentData, 0, len(m.file.Loads))
+func (m *MachOLoader) Segments() ([]SegmentData, error) {
+	ret := make([]SegmentData, 0, len(m.file.Loads))
 	for _, l := range m.file.Loads {
 		if s, ok := l.(*macho.Segment); ok {
 			switch s.Cmd {
@@ -191,7 +190,7 @@ func (m *MachOLoader) Segments() ([]models.SegmentData, error) {
 				if s.Name == "__PAGEZERO" {
 					continue
 				}
-				ret = append(ret, models.SegmentData{
+				ret = append(ret, SegmentData{
 					Off:  s.Offset,
 					Addr: s.Addr,
 					Size: s.Memsz,
@@ -206,18 +205,18 @@ func (m *MachOLoader) Segments() ([]models.SegmentData, error) {
 	return ret, nil
 }
 
-func (m *MachOLoader) getSymbols() ([]models.Symbol, error) {
-	var symbols []models.Symbol
+func (m *MachOLoader) getSymbols() ([]Symbol, error) {
+	var symbols []Symbol
 	if m.file.Symtab == nil {
 		return nil, errors.New("no symbol table found")
 	} else {
 		syms := m.file.Symtab.Syms
-		symbols = make([]models.Symbol, len(syms))
+		symbols = make([]Symbol, len(syms))
 		for i, s := range syms {
 			if s.Sect == 0 || s.Name == "" {
 				continue
 			}
-			symbols[i] = models.Symbol{
+			symbols[i] = Symbol{
 				Name:  s.Name,
 				Start: s.Value + uint64(m.fatOffset),
 				End:   0,
@@ -237,7 +236,7 @@ func (m *MachOLoader) getSymbols() ([]models.Symbol, error) {
 	return symbols, nil
 }
 
-func (m *MachOLoader) Symbols() ([]models.Symbol, error) {
+func (m *MachOLoader) Symbols() ([]Symbol, error) {
 	var err error
 	if m.symCache == nil {
 		m.symCache, err = m.getSymbols()

@@ -32,7 +32,7 @@ type Usercorn struct {
 
 	config  *models.Config
 	exe     string
-	loader  models.Loader
+	loader  loader.Loader
 	kernels []co.Kernel
 
 	base       uint64
@@ -60,7 +60,7 @@ type Usercorn struct {
 
 // NewUsercornWrapper is just a hacky woraround that usercorn has privat fields.
 // TODO(felberj) remove
-func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l models.Loader, os *models.OS, c *models.Config) *Usercorn {
+func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l loader.Loader, os *models.OS, c *models.Config) *Usercorn {
 	u := &Usercorn{
 		Task:   t,
 		config: c,
@@ -200,7 +200,7 @@ func (u *Usercorn) Exe() string {
 	return u.exe
 }
 
-func (u *Usercorn) Loader() models.Loader {
+func (u *Usercorn) Loader() loader.Loader {
 	return u.loader
 }
 
@@ -339,14 +339,14 @@ func (u *Usercorn) mapBinary(f *os.File) (entry, base, realEntry uint64, err err
 		}
 	}
 	// merge overlapping segments when writing contents to memory
-	merged := make([]*models.Segment, 0, len(segments))
+	merged := make([]*loader.Segment, 0, len(segments))
 outer:
 	for _, seg := range segments {
 		if seg.Size == 0 {
 			continue
 		}
 		addr, size := align(seg.Addr, seg.Size, true)
-		s := &models.Segment{Start: addr, End: addr + size, Prot: seg.Prot}
+		s := &loader.Segment{Start: addr, End: addr + size, Prot: seg.Prot}
 		for _, s2 := range merged {
 			if s2.Overlaps(s) {
 				s2.Merge(s)
