@@ -19,9 +19,6 @@ import (
 	co "github.com/felberj/binemu/kernel/common"
 )
 
-// #cgo LDFLAGS: -Wl,-rpath,\$ORIGIN/deps/lib:\$ORIGIN/lib
-import "C"
-
 type tramp struct {
 	desc string
 	fun  func() error
@@ -30,7 +27,7 @@ type tramp struct {
 type Usercorn struct {
 	*Task
 
-	config  *models.Config
+	config  *ExecConfig
 	exe     string
 	loader  loader.Loader
 	kernels []co.Kernel
@@ -60,7 +57,7 @@ type Usercorn struct {
 
 // NewUsercornWrapper is just a hacky woraround that usercorn has privat fields.
 // TODO(felberj) remove
-func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l loader.Loader, os *models.OS, c *models.Config) *Usercorn {
+func NewUsercornWrapper(exe string, t *Task, fs *ramfs.Filesystem, l loader.Loader, os *models.OS, c *ExecConfig) *Usercorn {
 	u := &Usercorn{
 		Task:   t,
 		config: c,
@@ -178,7 +175,7 @@ func (u *Usercorn) Run() error {
 			u.RegWrite(u.arch.SP, sp)
 		}
 	}
-	if _, ok := err.(models.ExitStatus); !ok && err != nil || u.config.Verbose {
+	if _, ok := err.(models.ExitStatus); !ok && err != nil {
 		if err != nil {
 			fmt.Printf("got error: %v", err)
 		}
@@ -432,8 +429,6 @@ func (u *Usercorn) StrucAt(addr uint64) *models.StrucStream {
 	r.Seek(int64(addr), io.SeekStart)
 	return models.NewStrucStream(r, options)
 }
-
-func (u *Usercorn) Config() *models.Config { return u.config }
 
 func (u *Usercorn) Restart(fn func(models.Usercorn, error) error) {
 	u.restart = fn

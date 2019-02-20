@@ -10,7 +10,6 @@ import (
 
 	"github.com/felberj/binemu/arch"
 	"github.com/felberj/binemu/loader"
-	"github.com/felberj/binemu/models"
 	"github.com/felberj/ramfs"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
@@ -88,7 +87,7 @@ func run(c *pb.Config, args []string) error {
 		return err
 	}
 	task := usercorn.NewTask(cpu, a, os, l.ByteOrder())
-	u := usercorn.NewUsercornWrapper(exe, task, fs, l, os, &models.Config{
+	u := usercorn.NewUsercornWrapper(exe, task, fs, l, os, &usercorn.ExecConfig{
 		Args: args,
 	})
 	if err := u.LoadBinary(f); err != nil {

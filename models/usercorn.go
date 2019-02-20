@@ -56,7 +56,6 @@ type Usercorn interface {
 	Malloc(size uint64, desc string) (uint64, error)
 	// end task
 
-	Config() *Config
 	Run() error
 
 	Brk(addr uint64) (uint64, error)
