@@ -70,7 +70,7 @@ func (t *Task) MemProt(addr, size uint64, prot int) error {
 
 func (t *Task) MemUnmap(addr, size uint64) error {
 	addr, size = align(addr, size, true)
-	err := t.Cpu.MemUnmap(addr, size)
+	err := t.Unicorn.MemUnmap(addr, size)
 	if err == nil {
 		for _, v := range t.mapHooks {
 			v.Unmap(addr, size)
@@ -144,7 +144,7 @@ func (t *Task) UnpackAddr(buf []byte) uint64 {
 }
 
 func (t *Task) PopBytes(p []byte) error {
-	sp, err := t.RegRead(t.arch.SP)
+	sp, err := t.Unicorn.RegRead(t.arch.SP)
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (t *Task) PopBytes(p []byte) error {
 }
 
 func (t *Task) PushBytes(p []byte) (uint64, error) {
-	sp, err := t.RegRead(t.arch.SP)
+	sp, err := t.Unicorn.RegRead(t.arch.SP)
 	if err != nil {
 		return 0, err
 	}
@@ -188,7 +188,7 @@ func (t *Task) RegReadBatch(regs []int) ([]uint64, error) {
 	// ret, err := t.Cpu.RegReadBatch(regs)
 	vals := make([]uint64, len(regs))
 	for i, enum := range regs {
-		val, err := t.Cpu.RegRead(enum)
+		val, err := t.Unicorn.RegRead(enum)
 		if err != nil {
 			return nil, errors.Wrap(err, "t.RegReadBatch() failed")
 		}
@@ -202,12 +202,12 @@ func (t *Task) RegDump() ([]models.RegVal, error) {
 }
 
 func (t *Task) RegRead(enum int) (uint64, error) {
-	val, err := t.Cpu.RegRead(enum)
+	val, err := t.Unicorn.RegRead(enum)
 	return val, errors.Wrap(err, "t.RegRead() failed")
 }
 
 func (t *Task) RegWrite(enum int, val uint64) error {
-	err := t.Cpu.RegWrite(enum, val)
+	err := t.Unicorn.RegWrite(enum, val)
 	return errors.Wrap(err, "t.RegWrite() failed")
 }
 

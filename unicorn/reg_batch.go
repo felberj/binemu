@@ -72,7 +72,7 @@ func NewRegBatch(regs []int) (*RegBatch, error) {
 
 // ReadFast skips copying and returns the internal vals array
 func (r *RegBatch) ReadFast(u Unicorn) ([]uint64, error) {
-	ucerr := C.uc_reg_read_batch(u.Handle(), r.cenums, r.crefs, r.ccount)
+	ucerr := C.uc_reg_read_batch(u.handle, r.cenums, r.crefs, r.ccount)
 	if ucerr != ERR_OK {
 		return nil, errReturn(ucerr)
 	}
@@ -90,6 +90,6 @@ func (r *RegBatch) Read(u Unicorn, vals []uint64) error {
 
 func (r *RegBatch) Write(u Unicorn, vals []uint64) error {
 	copy(r.vals[:len(vals)], vals)
-	ucerr := C.uc_reg_write_batch(u.Handle(), r.cenums, r.crefs, r.ccount)
+	ucerr := C.uc_reg_write_batch(u.handle, r.cenums, r.crefs, r.ccount)
 	return errReturn(ucerr)
 }

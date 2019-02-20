@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 
-	cpu "github.com/felberj/binemu/cpu/unicorn"
 	"github.com/felberj/binemu/kernel/common"
 	"github.com/felberj/binemu/kernel/linux"
 	"github.com/felberj/binemu/models"
@@ -46,7 +45,7 @@ func setupVsyscall(u models.Usercorn) error {
 	if _, err := mem.Write(ret); err != nil {
 		return err
 	}
-	_, err := u.HookAdd(cpum.HOOK_CODE, func(_ cpu.Cpu, addr uint64, size uint32) {
+	_, err := u.GetCPU().HookCode(func(addr uint64, size uint32) {
 		switch addr {
 		case vgettimeofday:
 			ret, _ := u.Syscall(96, "gettimeofday", common.RegArgs(u, AbiRegs))
@@ -80,7 +79,7 @@ func (k *LinuxAMD64Kernel) ArchPrctl(code int, addr uint64) {
 	// TODO: make SET check for valid mapped memory
 	switch code {
 	case ARCH_SET_FS:
-		u := k.U.Backend().(uc.Unicorn)
+		u := k.U.GetCPU().Unicorn
 		u.RegWriteX86Msr(fsmsr, addr)
 	// case ARCH_GET_FS:
 	// 	v, _ := u.X86MsrRead(fsmsr)

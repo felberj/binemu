@@ -10,7 +10,7 @@ import "C"
 
 type Context **C.uc_context
 
-func (u *uc) ContextSave(reuse Context) (Context, error) {
+func (u *Unicorn) ContextSave(reuse Context) (Context, error) {
 	ctx := reuse
 	if ctx == nil {
 		ctx = new(*C.uc_context)
@@ -24,6 +24,6 @@ func (u *uc) ContextSave(reuse Context) (Context, error) {
 	return ctx, nil
 }
 
-func (u *uc) ContextRestore(ctx Context) error {
+func (u *Unicorn) ContextRestore(ctx Context) error {
 	return errReturn(C.uc_context_restore(u.handle, *ctx))
 }

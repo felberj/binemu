@@ -56,8 +56,7 @@ type Usercorn struct {
 
 	restart func(models.Usercorn, error) error
 
-	hooks []cpum.Hook
-	fs    *ramfs.Filesystem
+	fs *ramfs.Filesystem
 }
 
 // NewUsercornWrapper is just a hacky woraround that usercorn has privat fields.
@@ -120,34 +119,15 @@ func (u *Usercorn) Fs() *ramfs.Filesystem {
 	return u.fs
 }
 
+// GetCPU returns the CPU
+func (u *Usercorn) GetCPU() *cpu.Cpu {
+	return u.Cpu
+}
+
 // ------------------ everything below is old code
-
-// HookAdd adds a CPU hook.
-func (u *Usercorn) HookAdd(htype int, cb interface{}, begin, end uint64, extra ...int) (cpum.Hook, error) {
-	hh, err := u.Cpu.HookAdd(htype, cb, begin, end, extra...)
-	if err == nil {
-		u.hooks = append(u.hooks, hh)
-	}
-	return hh, err
-}
-
-// HookDel removes the hook
-func (u *Usercorn) HookDel(hh cpum.Hook) error {
-	tmp := make([]cpum.Hook, 0, len(u.hooks))
-	for _, v := range u.hooks {
-		if v != hh {
-			tmp = append(tmp, v)
-		}
-	}
-	u.hooks = tmp
-	return u.Cpu.HookDel(hh)
-}
 
 func (u *Usercorn) Run() error {
 	defer func() {
-		for _, v := range u.hooks {
-			u.HookDel(v)
-		}
 		if e := recover(); e != nil {
 			fmt.Printf("\n+++ caught panic +++\n%s\n%s\n\n", e, debug.Stack())
 			panic(e)

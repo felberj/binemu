@@ -123,7 +123,7 @@ func (a *Arch) RegDumpFast(c *cpu.Cpu) ([]uint64, error) {
 		enums := a.RegEnums()
 		out := make([]uint64, len(enums))
 		for i, e := range enums {
-			val, err := c.RegRead(e)
+			val, err := c.Unicorn.RegRead(e)
 			if err != nil {
 				return nil, err
 			}

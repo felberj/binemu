@@ -1,6 +1,8 @@
 #include <unicorn/unicorn.h>
 #include "_cgo_export.h"
 
+// TODO(felber) figure out why this file is needed.
+
 uc_err uc_hook_add(uc_engine *uc, uc_hook *hh, int type, void *callback,
                 void *user_data, uint64_t begin, uint64_t end, ...);
 

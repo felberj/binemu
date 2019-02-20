@@ -83,7 +83,7 @@ func (k *LinuxKernel) gdtWrite(sel, base, limit, access, flags uint32) error {
 			Base:  k.gdt,
 			Limit: 31*8 - 1,
 		}
-		k.U.Backend().(uc.Unicorn).RegWriteMmr(uc.X86_REG_GDTR, &gdt)
+		k.U.Backend().(*uc.Unicorn).RegWriteMmr(uc.X86_REG_GDTR, &gdt)
 	}
 	// this is fragile but we only call it once below in SetThreadArea
 	s := k.U.StrucAt(k.gdt + uint64(sel)*8)

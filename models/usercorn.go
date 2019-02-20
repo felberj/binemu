@@ -4,7 +4,8 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/felberj/binemu/models/cpu"
+	cpu "github.com/felberj/binemu/cpu/unicorn"
+	cpum "github.com/felberj/binemu/models/cpu"
 	"github.com/felberj/ramfs"
 
 	uc "github.com/felberj/binemu/unicorn"
@@ -16,7 +17,7 @@ type SysHook struct {
 	Before, After SysCb
 }
 
-type MapCb func(addr, size uint64, prot int, desc string, file *cpu.FileDesc)
+type MapCb func(addr, size uint64, prot int, desc string, file *cpum.FileDesc)
 type UnmapCb func(addr, size uint64)
 type ProtCb func(addr, size uint64, prot int)
 type MapHook struct {
@@ -27,6 +28,7 @@ type MapHook struct {
 
 type Usercorn interface {
 	// CPU
+	GetCPU() *cpu.Cpu
 	Backend() interface{}
 	Mem() io.ReadWriteSeeker
 	RegRead(reg int) (uint64, error)
@@ -35,7 +37,6 @@ type Usercorn interface {
 	MemProt(addr, size uint64, prot int) error
 	MemUnmap(addr, size uint64) error
 	MemRegions() ([]*uc.MemRegion, error)
-	HookAdd(htype int, cb interface{}, begin, end uint64, extra ...int) (cpu.Hook, error)
 	// end CPU
 	//	Task
 	Arch() *Arch
@@ -50,8 +51,8 @@ type Usercorn interface {
 	Push(n uint64) (uint64, error)
 	OS() string
 
-	MemReserve(addr, size uint64, force bool) (*cpu.Page, error)
-	Mmap(addr, size uint64, prot int, fixed bool, desc string, file *cpu.FileDesc) (uint64, error)
+	MemReserve(addr, size uint64, force bool) (*cpum.Page, error)
+	Mmap(addr, size uint64, prot int, fixed bool, desc string, file *cpum.FileDesc) (uint64, error)
 	Malloc(size uint64, desc string) (uint64, error)
 	// end task
 
